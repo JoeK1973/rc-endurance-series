@@ -1,0 +1,1 @@
+export default function P(){return <><h1>Manage Teams</h1><div className="card"><p>Team administration is available here. Team managers create and manage their teams from Team Area.</p></div></>}

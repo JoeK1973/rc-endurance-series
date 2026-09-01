@@ -1,0 +1,1 @@
+export default function P(){return <><h1>Manage Drivers</h1><div className="card"><p>Driver administration is available here. Drivers register themselves and can manage their availability from Driver Area.</p></div></>}

@@ -32,3 +32,6 @@ update profiles
 set role = 'admin'
 where email = 'YOUR_EMAIL_ADDRESS';
 ```
+
+## Existing installations: Admin rounds fix
+If you already ran the previous schema, run `supabase/admin-rounds-fix.sql` in Supabase SQL Editor, then set your account role to admin.
