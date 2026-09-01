@@ -1,0 +1,1 @@
+export default function P(){return <><h1>Messages</h1><div className="card"><p>Your conversations are stored securely inside RC Endurance Series.</p><p>Open a driver profile and choose <b>Start conversation</b>.</p></div></>}

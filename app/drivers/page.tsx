@@ -1,0 +1,1 @@
+export default function P(){return <><h1>Drivers Available</h1><div className="card">Available driver search</div></>}

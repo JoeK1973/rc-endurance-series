@@ -1,0 +1,1 @@
+export default function P(){return <><h1>Admin</h1><div className="card">Manage rounds, drivers and teams</div></>}

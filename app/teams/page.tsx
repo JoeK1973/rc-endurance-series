@@ -1,0 +1,1 @@
+export default function P(){return <><h1>Team Area</h1><div className="card">Create and manage your team</div></>}
