@@ -133,11 +133,11 @@ export default function DriverArea(){
     </form>}
 
     {tab==="availability"&&<div className="card space">
-      <h2>Manage your racing availability</h2><p className="muted">Choose your status for each championship round. Drivers marked as looking for a team or reserve can be found by team managers.</p>
+      <h2>Manage your racing availability</h2><p className="muted">Choose your status for each championship round. Team managers can find drivers who are available to drive or available as a reserve.</p>
       {!rounds.length?<p className="muted">No rounds have been added yet.</p>:rounds.map(r=>{
         const current=availability.find(x=>x.round_id===r.id)?.status||"";
         return <div className="availabilityRow" key={r.id}><div><b>{r.name}</b><br/><span className="muted">{r.event_date}{r.venue?` · ${r.venue}`:""}</span></div>
-          <select className="input availabilitySelect" value={current} disabled={saving} onChange={e=>setStatus(r.id,e.target.value)}>
+          <select className={`input availabilitySelect availability-${current||"none"}`} value={current} disabled={saving} onChange={e=>setStatus(r.id,e.target.value)}>
             <option value="">Not set</option>{statuses.map(([value,label])=><option key={value} value={value}>{label}</option>)}
           </select>
         </div>
