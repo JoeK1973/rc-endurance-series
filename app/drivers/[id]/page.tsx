@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import Contact from "@/components/Contact";
 import { createClient } from "@/lib/supabase/client";
 
 type Driver = {
@@ -25,7 +24,6 @@ export default function DriverProfilePage() {
 
   const [driver, setDriver] = useState<Driver | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [rounds, setRounds] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -41,7 +39,6 @@ export default function DriverProfilePage() {
       const [
         { data: driverData, error: driverError },
         { data: profileData, error: profileError },
-        { data: roundsData, error: roundsError },
       ] = await Promise.all([
         supabase
           .from("drivers")
@@ -64,11 +61,6 @@ export default function DriverProfilePage() {
           `)
           .eq("id", id)
           .single(),
-
-        supabase
-          .from("rounds")
-          .select("*")
-          .order("event_date"),
       ]);
 
       if (driverError) {
@@ -83,15 +75,8 @@ export default function DriverProfilePage() {
         return;
       }
 
-      if (roundsError) {
-        setErrorMessage(roundsError.message);
-        setLoading(false);
-        return;
-      }
-
       setDriver(driverData as Driver);
       setProfile(profileData as Profile);
-      setRounds(roundsData || []);
       setLoading(false);
     }
 
@@ -102,6 +87,7 @@ export default function DriverProfilePage() {
     return (
       <>
         <h1>Driver Profile</h1>
+
         <div className="card">
           <p className="muted">Loading driver profile...</p>
         </div>
@@ -163,11 +149,6 @@ export default function DriverProfilePage() {
           </div>
         )}
       </div>
-
-      <Contact
-        driverId={driver.profile_id}
-        rounds={rounds}
-      />
     </>
   );
 }
