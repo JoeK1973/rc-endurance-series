@@ -1,37 +1,70 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import Contact from "@/components/Contact";
 import { createClient } from "@/lib/supabase/client";
-import StartConversation from "@/components/StartConversation";
 
-type PageProps = {
-  params: Promise<{
-    id: string;
-  }>;
+type Driver = {
+  profile_id: string;
+  classes: string[] | string | null;
+  experience: string | null;
+  endurance_experience: string | null;
+  bio: string | null;
 };
 
-export default function DriverProfilePage({ params }: PageProps) {
-  const { id } = use(params);
-  const [driver, setDriver] = useState<any>(null);
+type Profile = {
+  id: string;
+  name: string | null;
+  club: string | null;
+};
+
+export default function DriverProfilePage() {
+  const params = useParams();
+  const id = params.id as string;
+
+  const [driver, setDriver] = useState<Driver | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [rounds, setRounds] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
-    async function load() {
+    async function loadDriver() {
+      if (!id) return;
+
+      setLoading(true);
+      setErrorMessage("");
+
       const supabase = createClient();
 
       const [
         { data: driverData, error: driverError },
+        { data: profileData, error: profileError },
         { data: roundsData, error: roundsError },
       ] = await Promise.all([
         supabase
           .from("drivers")
-          .select(
-            "profile_id,experience,bio,classes,endurance_experience,profiles(name,club)"
-          )
+          .select(`
+            profile_id,
+            classes,
+            experience,
+            endurance_experience,
+            bio
+          `)
           .eq("profile_id", id)
-          .maybeSingle(),
+          .single(),
+
+        supabase
+          .from("profiles")
+          .select(`
+            id,
+            name,
+            club
+          `)
+          .eq("id", id)
+          .single(),
+
         supabase
           .from("rounds")
           .select("*")
@@ -39,80 +72,99 @@ export default function DriverProfilePage({ params }: PageProps) {
       ]);
 
       if (driverError) {
-        setError(driverError.message);
-      } else if (!driverData) {
-        setError("Driver not found.");
-      } else {
-        setDriver(driverData);
+        setErrorMessage(driverError.message);
+        setLoading(false);
+        return;
+      }
+
+      if (profileError) {
+        setErrorMessage(profileError.message);
+        setLoading(false);
+        return;
       }
 
       if (roundsError) {
-        setError((current) => current || roundsError.message);
+        setErrorMessage(roundsError.message);
+        setLoading(false);
+        return;
       }
 
+      setDriver(driverData as Driver);
+      setProfile(profileData as Profile);
       setRounds(roundsData || []);
       setLoading(false);
     }
 
-    load();
+    loadDriver();
   }, [id]);
 
   if (loading) {
-    return <div className="card">Loading driver profile...</div>;
-  }
-
-  if (error || !driver) {
     return (
-      <div className="card">
-        <h1>Driver not found</h1>
-        <p className="muted">
-          {error || "This driver profile could not be loaded."}
-        </p>
-      </div>
+      <>
+        <h1>Driver Profile</h1>
+        <div className="card">
+          <p className="muted">Loading driver profile...</p>
+        </div>
+      </>
     );
   }
 
-  const profile = Array.isArray(driver.profiles)
-    ? driver.profiles[0]
-    : driver.profiles;
+  if (errorMessage || !driver || !profile) {
+    return (
+      <>
+        <h1>Driver Profile</h1>
+
+        <div className="card">
+          <h2>Driver not found</h2>
+
+          {errorMessage && (
+            <p className="muted">{errorMessage}</p>
+          )}
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
-      <h1>{profile?.name || "Driver"}</h1>
+      <h1>{profile.name || "Driver Profile"}</h1>
 
       <div className="card space">
         <p className="muted">
-          {profile?.club || "Independent driver"}
+          {profile.club || "Independent driver"}
         </p>
 
         {driver.experience && (
           <p>
-            <b>Racing experience:</b> {driver.experience}
-          </p>
-        )}
-
-        {Array.isArray(driver.classes) && driver.classes.length > 0 && (
-          <p>
-            <b>Classes:</b> {driver.classes.join(", ")}
+            <strong>Experience:</strong> {driver.experience}
           </p>
         )}
 
         {driver.endurance_experience && (
-          <>
-            <h2>Endurance experience</h2>
-            <p>{driver.endurance_experience}</p>
-          </>
+          <p>
+            <strong>Endurance experience:</strong>{" "}
+            {driver.endurance_experience}
+          </p>
+        )}
+
+        {driver.classes && (
+          <p>
+            <strong>Classes:</strong>{" "}
+            {Array.isArray(driver.classes)
+              ? driver.classes.join(", ")
+              : driver.classes}
+          </p>
         )}
 
         {driver.bio && (
-          <>
-            <h2>About</h2>
+          <div className="space">
+            <strong>About the driver</strong>
             <p>{driver.bio}</p>
-          </>
+          </div>
         )}
       </div>
 
-      <StartConversation
+      <Contact
         driverId={driver.profile_id}
         rounds={rounds}
       />
