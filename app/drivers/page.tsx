@@ -1,261 +1,172 @@
-"use client";
-
-import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
+import { createClient } from "@/lib/supabase/server";
 
-type Round = {
-  id: string;
-  name: string;
-  event_date: string;
-  venue: string | null;
-};
+export default async function DriversPage() {
+  const supabase = await createClient();
 
-type Driver = {
-  profile_id: string;
-  classes: string[] | null;
-  experience: string | null;
-  endurance_experience: string | null;
-  bio: string | null;
-  profiles: {
-    name: string | null;
-    club: string | null;
-  } | null;
-};
+  const [
+    { data: roundsData },
+    { data: driversData, error: driversError },
+    { data: availabilityData },
+  ] = await Promise.all([
+    supabase
+      .from("rounds")
+      .select("*")
+      .order("event_date"),
 
-type Availability = {
-  driver_id: string;
-  round_id: string;
-  status: string;
-};
+    supabase
+      .from("drivers")
+      .select(`
+        profile_id,
+        classes,
+        experience,
+        endurance_experience,
+        bio,
+        profiles!drivers_profile_id_fkey (
+          name,
+          club
+        )
+      `),
 
-export default function DriversPage() {
-  const [rounds, setRounds] = useState<Round[]>([]);
-  const [drivers, setDrivers] = useState<Driver[]>([]);
-  const [availability, setAvailability] = useState<Availability[]>([]);
-  const [roundId, setRoundId] = useState("");
-  const [search, setSearch] = useState("");
-  const [experience, setExperience] = useState("");
-  const [status, setStatus] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [message, setMessage] = useState("");
+    supabase
+      .from("driver_availability")
+      .select(`
+        driver_id,
+        round_id,
+        status
+      `),
+  ]);
 
-  useEffect(() => {
-    async function load() {
-      const supabase = createClient();
-
-      const [
-        { data: roundsData, error: roundsError },
-        { data: driversData, error: driversError },
-        { data: availabilityData, error: availabilityError },
-      ] = await Promise.all([
-        supabase.from("rounds").select("*").order("event_date"),
-        supabase
-          .from("drivers")
-          .select("profile_id,classes,experience,endurance_experience,bio,profiles(name,club)"),
-        supabase.from("driver_availability").select("driver_id,round_id,status"),
-      ]);
-
-      if (roundsError || driversError || availabilityError) {
-        setMessage(
-          roundsError?.message ||
-            driversError?.message ||
-            availabilityError?.message ||
-            "Could not load driver availability."
-        );
-      }
-
-      const loadedRounds = (roundsData || []) as Round[];
-      setRounds(loadedRounds);
-      setDrivers((driversData || []) as unknown as Driver[]);
-      setAvailability((availabilityData || []) as Availability[]);
-      setRoundId(loadedRounds[0]?.id || "");
-      setLoading(false);
-    }
-
-    load();
-  }, []);
-
-  const availableDrivers = useMemo(() => {
-    return drivers
-      .map((driver) => {
-        const driverAvailability = availability.find(
-          (item) =>
-            item.driver_id === driver.profile_id &&
-            item.round_id === roundId
-        );
-
-        return {
-          ...driver,
-          availabilityStatus: driverAvailability?.status || "",
-        };
-      })
-      .filter((driver) => {
-        // Only these two statuses make a driver visible to team managers.
-        if (
-          !["available_to_drive", "reserve"].includes(
-            driver.availabilityStatus
-          )
-        ) {
-          return false;
-        }
-
-        const name = driver.profiles?.name || "";
-        const club = driver.profiles?.club || "";
-        const query = search.toLowerCase().trim();
-
-        const matchesSearch =
-          !query ||
-          name.toLowerCase().includes(query) ||
-          club.toLowerCase().includes(query);
-
-        const matchesExperience =
-          !experience || driver.experience === experience;
-
-        const matchesStatus =
-          !status || driver.availabilityStatus === status;
-
-        return matchesSearch && matchesExperience && matchesStatus;
-      });
-  }, [drivers, availability, roundId, search, experience, status]);
-
-  if (loading) {
+  if (driversError) {
     return (
       <>
-        <h1>Drivers Available</h1>
-        <div className="card">Loading available drivers...</div>
+        <h1>Drivers</h1>
+
+        <div className="card">
+          <h2>Unable to load drivers</h2>
+          <p className="muted">{driversError.message}</p>
+        </div>
       </>
     );
   }
 
+  const rounds = roundsData || [];
+  const drivers = driversData || [];
+  const availability = availabilityData || [];
+
+  const availableDrivers = drivers.filter((driver: any) => {
+    return availability.some(
+      (item: any) =>
+        item.driver_id === driver.profile_id &&
+        [
+          "available_to_drive",
+          "available_reserve",
+          "looking_for_team",
+          "reserve",
+        ].includes(item.status)
+    );
+  });
+
   return (
     <>
-      <h1>Drivers Available</h1>
+      <h1>Find a Driver</h1>
+
       <p className="muted">
-        Select a championship round to find drivers who are available to drive
-        or available as a reserve.
+        Search drivers who have marked themselves as available to drive or
+        available as a reserve.
       </p>
 
-      {message && <div className="notice space">{message}</div>}
-
-      {!rounds.length ? (
+      {rounds.length === 0 ? (
         <div className="card space">
-          No championship rounds have been published yet.
+          <p>No championship rounds have been added yet.</p>
         </div>
-      ) : (
-        <>
-          <div className="card grid two space">
-            <label>
-              Round
-              <select
-                className="input"
-                value={roundId}
-                onChange={(e) => setRoundId(e.target.value)}
-              >
-                {rounds.map((round) => (
-                  <option key={round.id} value={round.id}>
-                    {round.name} — {round.event_date}
-                  </option>
-                ))}
-              </select>
-            </label>
+      ) : null}
 
-            <label>
-              Search
-              <input
-                className="input"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Driver name or club"
-              />
-            </label>
-
-            <label>
-              Experience
-              <select
-                className="input"
-                value={experience}
-                onChange={(e) => setExperience(e.target.value)}
-              >
-                <option value="">Any experience</option>
-                <option value="Beginner">Beginner</option>
-                <option value="Intermediate">Intermediate</option>
-                <option value="Experienced">Experienced</option>
-                <option value="Expert">Expert</option>
-              </select>
-            </label>
-
-            <label>
-              Availability
-              <select
-                className="input"
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-              >
-                <option value="">Available to drive or reserve</option>
-                <option value="available_to_drive">
-                  Available to drive
-                </option>
-                <option value="reserve">Available as a reserve</option>
-              </select>
-            </label>
-          </div>
+      {availableDrivers.length === 0 ? (
+        <div className="card space">
+          <h2>No drivers currently available</h2>
 
           <p className="muted">
-            {availableDrivers.length} driver
-            {availableDrivers.length === 1 ? "" : "s"} found.
+            No drivers have currently marked themselves as available to drive
+            or available as a reserve.
           </p>
+        </div>
+      ) : (
+        <div className="grid two space">
+          {availableDrivers.map((driver: any) => {
+            const profile = Array.isArray(driver.profiles)
+              ? driver.profiles[0]
+              : driver.profiles;
 
-          <div className="grid two space">
-            {availableDrivers.map((driver) => (
+            const driverAvailability = availability.filter(
+              (item: any) => item.driver_id === driver.profile_id
+            );
+
+            const availableToDrive = driverAvailability.some(
+              (item: any) =>
+                item.status === "available_to_drive" ||
+                item.status === "looking_for_team"
+            );
+
+            const availableAsReserve = driverAvailability.some(
+              (item: any) =>
+                item.status === "available_reserve" ||
+                item.status === "reserve"
+            );
+
+            return (
               <div className="card" key={driver.profile_id}>
-                <div className="driverCardTop">
-                  <div>
-                    <h2>{driver.profiles?.name || "Driver"}</h2>
-                    <p className="muted">
-                      {driver.profiles?.club || "Independent driver"}
-                    </p>
-                  </div>
+                <h2>{profile?.name || "Unnamed Driver"}</h2>
 
-                  <span
-                    className={`status ${driver.availabilityStatus}`}
-                  >
-                    {driver.availabilityStatus === "available_to_drive"
-                      ? "Available to drive"
-                      : "Available as a reserve"}
-                  </span>
-                </div>
+                <p className="muted">
+                  {profile?.club || "Independent driver"}
+                </p>
 
                 {driver.experience && (
                   <p>
-                    <b>Experience:</b> {driver.experience}
+                    <strong>Experience:</strong> {driver.experience}
                   </p>
                 )}
 
-                {driver.classes && driver.classes.length > 0 && (
+                {driver.classes && (
                   <p>
-                    <b>Classes:</b> {driver.classes.join(", ")}
+                    <strong>Classes:</strong>{" "}
+                    {Array.isArray(driver.classes)
+                      ? driver.classes.join(", ")
+                      : driver.classes}
                   </p>
                 )}
 
-                {driver.bio && <p className="muted">{driver.bio}</p>}
+                {driver.endurance_experience && (
+                  <p className="muted">
+                    {driver.endurance_experience}
+                  </p>
+                )}
+
+                <div className="space">
+                  {availableToDrive && (
+                    <span className="status available_to_drive">
+                      Available to drive
+                    </span>
+                  )}
+
+                  {availableAsReserve && (
+                    <span className="status available_reserve">
+                      Available as a reserve
+                    </span>
+                  )}
+                </div>
 
                 <Link
-                  className="btn"
+                  className="btn space"
                   href={`/drivers/${driver.profile_id}`}
                 >
                   View profile
                 </Link>
               </div>
-            ))}
-          </div>
-
-          {!availableDrivers.length && (
-            <div className="card space">
-              No drivers match your filters for this round.
-            </div>
-          )}
-        </>
+            );
+          })}
+        </div>
       )}
     </>
   );
