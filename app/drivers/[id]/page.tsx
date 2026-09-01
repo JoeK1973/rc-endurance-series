@@ -1,4 +1,7 @@
-import { createClient } from "@/lib/supabase/server";
+"use client";
+
+import { use, useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 import StartConversation from "@/components/StartConversation";
 
 type PageProps = {
@@ -7,30 +10,63 @@ type PageProps = {
   }>;
 };
 
-export default async function DriverProfilePage({ params }: PageProps) {
-  const { id } = await params;
-  const supabase = await createClient();
+export default function DriverProfilePage({ params }: PageProps) {
+  const { id } = use(params);
+  const [driver, setDriver] = useState<any>(null);
+  const [rounds, setRounds] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const [
-    { data: driver, error: driverError },
-    { data: rounds },
-  ] = await Promise.all([
-    supabase
-      .from("drivers")
-      .select(
-        "profile_id,experience,bio,classes,endurance_experience,profiles(name,club)"
-      )
-      .eq("profile_id", id)
-      .maybeSingle(),
-    supabase.from("rounds").select("*").order("event_date"),
-  ]);
+  useEffect(() => {
+    async function load() {
+      const supabase = createClient();
 
-  if (driverError || !driver) {
+      const [
+        { data: driverData, error: driverError },
+        { data: roundsData, error: roundsError },
+      ] = await Promise.all([
+        supabase
+          .from("drivers")
+          .select(
+            "profile_id,experience,bio,classes,endurance_experience,profiles(name,club)"
+          )
+          .eq("profile_id", id)
+          .maybeSingle(),
+        supabase
+          .from("rounds")
+          .select("*")
+          .order("event_date"),
+      ]);
+
+      if (driverError) {
+        setError(driverError.message);
+      } else if (!driverData) {
+        setError("Driver not found.");
+      } else {
+        setDriver(driverData);
+      }
+
+      if (roundsError) {
+        setError((current) => current || roundsError.message);
+      }
+
+      setRounds(roundsData || []);
+      setLoading(false);
+    }
+
+    load();
+  }, [id]);
+
+  if (loading) {
+    return <div className="card">Loading driver profile...</div>;
+  }
+
+  if (error || !driver) {
     return (
       <div className="card">
         <h1>Driver not found</h1>
         <p className="muted">
-          {driverError?.message || "This driver profile could not be loaded."}
+          {error || "This driver profile could not be loaded."}
         </p>
       </div>
     );
@@ -78,7 +114,7 @@ export default async function DriverProfilePage({ params }: PageProps) {
 
       <StartConversation
         driverId={driver.profile_id}
-        rounds={rounds || []}
+        rounds={rounds}
       />
     </>
   );
