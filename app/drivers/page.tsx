@@ -52,7 +52,9 @@ export default function DriversPage() {
         supabase.from("rounds").select("*").order("event_date"),
         supabase
           .from("drivers")
-          .select("profile_id,classes,experience,endurance_experience,bio,profiles(name,club)"),
+          .select(
+          "profile_id,classes,experience,endurance_experience,bio,profiles!drivers_profile_id_fkey(name,club)"
+      ),
         supabase.from("driver_availability").select("driver_id,round_id,status"),
       ]);
 
