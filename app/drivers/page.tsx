@@ -1,86 +1,170 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/client";
 
-export default async function DriversPage() {
-  const supabase = await createClient();
+type Driver = {
+  profile_id: string;
+  classes: string[] | string | null;
+  experience: string | null;
+  endurance_experience: string | null;
+  bio: string | null;
+};
 
-  const [
-    { data: roundsData },
-    { data: driversData, error: driversError },
-    { data: availabilityData },
-  ] = await Promise.all([
-    supabase
-      .from("rounds")
-      .select("*")
-      .order("event_date"),
+type Profile = {
+  id: string;
+  name: string | null;
+  club: string | null;
+};
 
-    supabase
-      .from("drivers")
-      .select(`
-        profile_id,
-        classes,
-        experience,
-        endurance_experience,
-        bio,
-        profiles!drivers_profile_id_fkey (
-          name,
-          club
-        )
-      `),
+type Availability = {
+  driver_id: string;
+  round_id: string;
+  status: string;
+};
 
-    supabase
-      .from("driver_availability")
-      .select(`
-        driver_id,
-        round_id,
-        status
-      `),
-  ]);
+export default function DriversPage() {
+  const [drivers, setDrivers] = useState<Driver[]>([]);
+  const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [availability, setAvailability] = useState<Availability[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("");
 
-  if (driversError) {
+  useEffect(() => {
+    async function loadDrivers() {
+      setLoading(true);
+      setMessage("");
+
+      const supabase = createClient();
+
+      const [
+        { data: driversData, error: driversError },
+        { data: profilesData, error: profilesError },
+        { data: availabilityData, error: availabilityError },
+      ] = await Promise.all([
+        supabase
+          .from("drivers")
+          .select(`
+            profile_id,
+            classes,
+            experience,
+            endurance_experience,
+            bio
+          `),
+
+        supabase
+          .from("profiles")
+          .select(`
+            id,
+            name,
+            club
+          `),
+
+        supabase
+          .from("driver_availability")
+          .select(`
+            driver_id,
+            round_id,
+            status
+          `),
+      ]);
+
+      if (driversError) {
+        setMessage(`Unable to load drivers: ${driversError.message}`);
+        setLoading(false);
+        return;
+      }
+
+      if (profilesError) {
+        setMessage(`Unable to load driver profiles: ${profilesError.message}`);
+        setLoading(false);
+        return;
+      }
+
+      if (availabilityError) {
+        setMessage(
+          `Unable to load driver availability: ${availabilityError.message}`
+        );
+        setLoading(false);
+        return;
+      }
+
+      setDrivers((driversData || []) as Driver[]);
+      setProfiles((profilesData || []) as Profile[]);
+      setAvailability((availabilityData || []) as Availability[]);
+      setLoading(false);
+    }
+
+    loadDrivers();
+  }, []);
+
+  const getProfile = (profileId: string) => {
+    return profiles.find((profile) => profile.id === profileId);
+  };
+
+  const getDriverAvailability = (profileId: string) => {
+    return availability.filter(
+      (item) => item.driver_id === profileId
+    );
+  };
+
+  const hasAvailableToDrive = (profileId: string) => {
+    return getDriverAvailability(profileId).some(
+      (item) =>
+        item.status === "available_to_drive" ||
+        item.status === "looking_for_team"
+    );
+  };
+
+  const hasReserveAvailability = (profileId: string) => {
+    return getDriverAvailability(profileId).some(
+      (item) =>
+        item.status === "available_as_reserve" ||
+        item.status === "available_reserve" ||
+        item.status === "reserve"
+    );
+  };
+
+  const availableDrivers = drivers.filter((driver) => {
+    return (
+      hasAvailableToDrive(driver.profile_id) ||
+      hasReserveAvailability(driver.profile_id)
+    );
+  });
+
+  if (loading) {
     return (
       <>
-        <h1>Drivers</h1>
+        <h1>Find a Driver</h1>
 
         <div className="card">
-          <h2>Unable to load drivers</h2>
-          <p className="muted">{driversError.message}</p>
+          <p className="muted">Loading drivers...</p>
         </div>
       </>
     );
   }
 
-  const rounds = roundsData || [];
-  const drivers = driversData || [];
-  const availability = availabilityData || [];
+  if (message) {
+    return (
+      <>
+        <h1>Find a Driver</h1>
 
-  const availableDrivers = drivers.filter((driver: any) => {
-    return availability.some(
-      (item: any) =>
-        item.driver_id === driver.profile_id &&
-        [
-          "available_to_drive",
-          "available_reserve",
-          "looking_for_team",
-          "reserve",
-        ].includes(item.status)
+        <div className="card">
+          <h2>Unable to load drivers</h2>
+          <p className="muted">{message}</p>
+        </div>
+      </>
     );
-  });
+  }
 
   return (
     <>
       <h1>Find a Driver</h1>
 
       <p className="muted">
-        Search drivers who have marked themselves as available to drive or
-        available as a reserve.
+        Search drivers who are available to drive or available as a reserve.
       </p>
-
-      {rounds.length === 0 ? (
-        <div className="card space">
-          <p>No championship rounds have been added yet.</p>
-        </div>
-      ) : null}
 
       {availableDrivers.length === 0 ? (
         <div className="card space">
@@ -93,29 +177,19 @@ export default async function DriversPage() {
         </div>
       ) : (
         <div className="grid two space">
-          {availableDrivers.map((driver: any) => {
-            const profile = Array.isArray(driver.profiles)
-              ? driver.profiles[0]
-              : driver.profiles;
+          {availableDrivers.map((driver) => {
+            const profile = getProfile(driver.profile_id);
 
-            const driverAvailability = availability.filter(
-              (item: any) => item.driver_id === driver.profile_id
+            const availableToDrive = hasAvailableToDrive(
+              driver.profile_id
             );
 
-            const availableToDrive = driverAvailability.some(
-              (item: any) =>
-                item.status === "available_to_drive" ||
-                item.status === "looking_for_team"
-            );
-
-            const availableAsReserve = driverAvailability.some(
-              (item: any) =>
-                item.status === "available_reserve" ||
-                item.status === "reserve"
+            const availableAsReserve = hasReserveAvailability(
+              driver.profile_id
             );
 
             return (
-              <div className="card" key={driver.profile_id}>
+              <div className="card space" key={driver.profile_id}>
                 <h2>{profile?.name || "Unnamed Driver"}</h2>
 
                 <p className="muted">
@@ -143,7 +217,7 @@ export default async function DriversPage() {
                   </p>
                 )}
 
-                <div className="space">
+                <div className="statusList">
                   {availableToDrive && (
                     <span className="status available_to_drive">
                       Available to drive
@@ -151,7 +225,7 @@ export default async function DriversPage() {
                   )}
 
                   {availableAsReserve && (
-                    <span className="status available_reserve">
+                    <span className="status available_as_reserve">
                       Available as a reserve
                     </span>
                   )}
