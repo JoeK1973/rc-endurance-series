@@ -8,9 +8,10 @@ type Round = { id:string; name:string; event_date:string; venue:string|null };
 type Availability = { round_id:string; status:string };
 
 const statuses = [
-  ["looking_for_team","Looking for a team"],
-  ["reserve","Available as reserve"],
-  ["unavailable","Not available"],
+  ["have_team", "Have a team"],
+  ["available_to_drive", "Available to drive"],
+  ["reserve", "Available as a reserve"],
+  ["unavailable", "Not available"],
 ] as const;
 
 export default function DriverArea(){
@@ -79,7 +80,12 @@ export default function DriverArea(){
     setNotice("Availability updated.");
   }
 
-  const availableCount=availability.filter(x=>x.status==="looking_for_team"||x.status==="reserve").length;
+  const availableCount = availability.filter(
+  x =>
+    x.status === "available_to_drive" ||
+    x.status === "reserve"
+).length;
+  
   const upcoming=useMemo(()=>rounds.filter(r=>new Date(r.event_date+"T23:59:59")>=new Date()),[rounds]);
 
   if(loading)return <div className="card"><h2>Loading your driver area...</h2></div>;
