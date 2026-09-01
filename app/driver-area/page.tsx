@@ -1,1 +1,2 @@
-export default function P(){return <><h1>Driver Area</h1><div className="card">Profile, availability and messages</div></>}
+import DriverArea from "@/components/DriverArea";
+export default function DriverAreaPage(){return <DriverArea/>;}
