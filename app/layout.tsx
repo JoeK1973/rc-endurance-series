@@ -8,10 +8,9 @@ export default function RootLayout({children}:{children:React.ReactNode}){
       <Link className="brand" href="/"><span className="brandRC">RC</span><span className="brandWords">ENDURANCE<br/>SERIES</span><span className="brandFlag">▰▰▰</span></Link>
       <nav className="navs">
         <Link className="nav" href="/">Home</Link>
-        <Link className="nav" href="/championship">Rounds</Link>
+        <Link className="nav" href="/championship">Series Details</Link>
         <Link className="nav" href="/drivers">Drivers</Link>
         <Link className="nav" href="/teams">Teams</Link>
-        <Link className="nav" href="/championship/results">Results</Link>
         <AuthNav/>
       </nav>
     </div></header>
