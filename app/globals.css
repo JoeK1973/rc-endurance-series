@@ -5,3 +5,71 @@
 .sectionTab:hover{background:#f3f6fa;color:#344255}
 .sectionTab.active{color:#365a91;background:#fff;border-color:#314052;box-shadow:0 2px 5px rgba(29,44,66,.08)}
 @media(max-width:500px){.sectionTabs{gap:4px;padding:5px}.sectionTab{min-height:42px;padding:9px 12px;font-size:.92rem}}
+/* ========================================
+   RC ENDURANCE RACING LOGO
+======================================== */
+
+.brandLogo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.logoImage {
+  width: 230px;
+  height: auto;
+  display: block;
+}
+
+/* Keep the header aligned correctly */
+
+.siteHeader {
+  width: 100%;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+}
+
+.navs {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* Tablet */
+
+@media (max-width: 900px) {
+  .head {
+    gap: 20px;
+  }
+
+  .logoImage {
+    width: 190px;
+  }
+}
+
+/* Mobile */
+
+@media (max-width: 700px) {
+  .head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .logoImage {
+    width: 220px;
+  }
+
+  .navs {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+}
