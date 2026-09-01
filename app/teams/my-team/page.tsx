@@ -1,1 +1,2 @@
-export default function P(){return <><h1>My Team</h1><div className="card">Manage your round-by-round drivers</div></>}
+import TeamsArea from "@/components/TeamsArea";
+export default function MyTeamPage(){return <TeamsArea initialTab="team"/>;}

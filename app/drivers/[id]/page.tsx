@@ -4,14 +4,7 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import StartConversation from "@/components/StartConversation";
 
-type PageProps = {
-  params: Promise<{
-    id: string;
-  }>;
-};
-
-export default function DriverProfilePage({ params }: PageProps) {
-  const [driverId, setDriverId] = useState("");
+export default function DriverProfilePage({ params }: { params: { id: string } }) {
   const [driver, setDriver] = useState<any>(null);
   const [rounds, setRounds] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -19,10 +12,6 @@ export default function DriverProfilePage({ params }: PageProps) {
 
   useEffect(() => {
     async function load() {
-      const { id } = await params;
-
-      setDriverId(id);
-
       const supabase = createClient();
 
       const [
@@ -31,16 +20,10 @@ export default function DriverProfilePage({ params }: PageProps) {
       ] = await Promise.all([
         supabase
           .from("drivers")
-          .select(
-            "profile_id,experience,bio,classes,endurance_experience,profiles(name,club)"
-          )
-          .eq("profile_id", id)
+          .select("profile_id,experience,bio,classes,endurance_experience,profiles(name,club)")
+          .eq("profile_id", params.id)
           .maybeSingle(),
-
-        supabase
-          .from("rounds")
-          .select("*")
-          .order("event_date"),
+        supabase.from("rounds").select("*").order("event_date"),
       ]);
 
       if (driverError) {
@@ -60,26 +43,14 @@ export default function DriverProfilePage({ params }: PageProps) {
     }
 
     load();
-  }, [params]);
+  }, [params.id]);
 
   if (loading) {
-    return (
-      <div className="card">
-        Loading driver profile...
-      </div>
-    );
+    return <div className="card">Loading driver profile...</div>;
   }
 
   if (error || !driver) {
-    return (
-      <div className="card">
-        <h1>Driver not found</h1>
-
-        <p className="muted">
-          {error || "This driver profile could not be loaded."}
-        </p>
-      </div>
-    );
+    return <div className="card"><h1>Driver not found</h1><p className="muted">{error || "This driver profile could not be loaded."}</p></div>;
   }
 
   const profile = Array.isArray(driver.profiles)
@@ -91,22 +62,15 @@ export default function DriverProfilePage({ params }: PageProps) {
       <h1>{profile?.name || "Driver"}</h1>
 
       <div className="card space">
-        <p className="muted">
-          {profile?.club || "Independent driver"}
-        </p>
+        <p className="muted">{profile?.club || "Independent driver"}</p>
 
         {driver.experience && (
-          <p>
-            <b>Racing experience:</b> {driver.experience}
-          </p>
+          <p><b>Racing experience:</b> {driver.experience}</p>
         )}
 
-        {Array.isArray(driver.classes) &&
-          driver.classes.length > 0 && (
-            <p>
-              <b>Classes:</b> {driver.classes.join(", ")}
-            </p>
-          )}
+        {Array.isArray(driver.classes) && driver.classes.length > 0 && (
+          <p><b>Classes:</b> {driver.classes.join(", ")}</p>
+        )}
 
         {driver.endurance_experience && (
           <>
@@ -123,12 +87,7 @@ export default function DriverProfilePage({ params }: PageProps) {
         )}
       </div>
 
-      {driverId && (
-        <StartConversation
-          driverId={driverId}
-          rounds={rounds}
-        />
-      )}
+      <StartConversation driverId={driver.profile_id} rounds={rounds} />
     </>
   );
 }
