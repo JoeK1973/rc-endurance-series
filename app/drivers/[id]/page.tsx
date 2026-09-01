@@ -142,6 +142,12 @@ export default function DriverProfilePage() {
       return;
     }
 
+    if (!message.trim()) {
+      setContactMessage("Please enter a message.");
+      setSending(false);
+      return;
+    }
+
     const { data: teams, error: teamError } = await supabase
       .from("teams")
       .select("id,name")
@@ -164,11 +170,6 @@ export default function DriverProfilePage() {
       return;
     }
 
-    /*
-      First look for an existing conversation between
-      this team, this driver and this round.
-    */
-
     const {
       data: existingConversation,
       error: conversationSearchError,
@@ -187,10 +188,6 @@ export default function DriverProfilePage() {
     }
 
     let conversationId = existingConversation?.id;
-
-    /*
-      Create a conversation if one does not already exist.
-    */
 
     if (!conversationId) {
       const {
@@ -215,16 +212,12 @@ export default function DriverProfilePage() {
       conversationId = newConversation.id;
     }
 
-    /*
-      Send the actual message.
-    */
-
     const { error: messageError } = await supabase
       .from("messages")
       .insert({
         conversation_id: conversationId,
         sender_id: user.id,
-        content: message.trim(),
+        body: message.trim(),
       });
 
     if (messageError) {
@@ -303,10 +296,7 @@ export default function DriverProfilePage() {
         )}
       </div>
 
-      <form
-        onSubmit={contactDriver}
-        className="card space"
-      >
+      <form onSubmit={contactDriver} className="card space">
         <h2>Contact this driver</h2>
 
         <p className="muted">
@@ -314,9 +304,7 @@ export default function DriverProfilePage() {
           your team for a championship round.
         </p>
 
-        <label>
-          Championship round
-        </label>
+        <label>Championship round</label>
 
         <select
           className="input"
@@ -331,18 +319,13 @@ export default function DriverProfilePage() {
           )}
 
           {rounds.map((round) => (
-            <option
-              key={round.id}
-              value={round.id}
-            >
+            <option key={round.id} value={round.id}>
               {round.name}
             </option>
           ))}
         </select>
 
-        <label className="space">
-          Message
-        </label>
+        <label className="space">Message</label>
 
         <textarea
           className="input"
@@ -363,9 +346,7 @@ export default function DriverProfilePage() {
         </button>
 
         {contactMessage && (
-          <p className="muted">
-            {contactMessage}
-          </p>
+          <p className="muted">{contactMessage}</p>
         )}
       </form>
     </>
