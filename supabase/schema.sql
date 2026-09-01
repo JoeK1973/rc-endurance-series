@@ -1,6 +1,6 @@
 create extension if not exists pgcrypto;
 create table if not exists profiles(id uuid primary key references auth.users(id) on delete cascade,name text,email text,club text,role text default 'driver');
-create table if not exists drivers(profile_id uuid primary key references profiles(id) on delete cascade,classes text[] default '{}',experience text,bio text);
+create table if not exists drivers(profile_id uuid primary key references profiles(id) on delete cascade,classes text[] default '{}',experience text,endurance_experience text,bio text);
 create table if not exists rounds(id uuid primary key default gen_random_uuid(),name text not null,event_date date not null,venue text);
 create table if not exists driver_availability(driver_id uuid references drivers(profile_id) on delete cascade,round_id uuid references rounds(id) on delete cascade,status text not null,primary key(driver_id,round_id));
 create table if not exists teams(id uuid primary key default gen_random_uuid(),name text not null,manager_id uuid references profiles(id),club text);
