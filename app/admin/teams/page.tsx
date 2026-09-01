@@ -1,1 +1,19 @@
-export default function P(){return <><h1>Manage Teams</h1><div className="card"><p>Team administration is available here. Team managers create and manage their teams from Team Area.</p></div></>}
+import AdminTabs from "@/components/AdminTabs";
+
+export default function ManageTeamsPage() {
+  return (
+    <>
+      <h1>Admin</h1>
+      <p className="muted">Manage teams in the RC Endurance Series.</p>
+      <AdminTabs />
+
+      <div className="card">
+        <h2>Manage Teams</h2>
+        <p className="muted">
+          Team administration is available here. Team managers create and
+          manage their teams from Team Area.
+        </p>
+      </div>
+    </>
+  );
+}
