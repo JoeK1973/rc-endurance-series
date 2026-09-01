@@ -1,6 +1,7 @@
 # RC Endurance Series
 
-1. Run `supabase/schema.sql`.
-2. Add Supabase URL and anon key to Vercel.
-3. Deploy.
-4. Register, then promote yourself: `update profiles set role='admin' where email='YOUR_EMAIL';`
+The top navigation now shows **Login** and **Register** when signed out.
+
+After login it shows **Driver Area**, **Messages**, **Team Area** for managers/admins, **Admin** for admins, and **Logout**.
+
+Run `supabase/schema.sql`, add your Supabase environment variables to Vercel, then deploy.
