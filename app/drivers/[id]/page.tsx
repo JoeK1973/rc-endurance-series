@@ -28,7 +28,7 @@ export default function DriverProfilePage({ params }: PageProps) {
         supabase
           .from("drivers")
           .select(
-            "profile_id,experience,bio,classes,endurance_experience,profiles!drivers_profile_id_fkey(name,club)"
+            "profile_id,experience,bio,classes,endurance_experience,profiles(name,club)"
           )
           .eq("profile_id", id)
           .maybeSingle(),
