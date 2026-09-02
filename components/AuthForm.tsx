@@ -3,12 +3,24 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
-export default function AuthForm({ mode }: { mode: "login" | "register" }) {
+export default function AuthForm({
+  mode,
+}: {
+  mode: "login" | "register";
+}) {
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
   async function submit(formData: FormData) {
+    setMessage("");
+    setLoading(true);
+
     const supabase = createClient();
-    const email = String(formData.get("email") || "").trim();
+
+    const email = String(formData.get("email") || "")
+      .trim()
+      .toLowerCase();
+
     const password = String(formData.get("password") || "");
 
     if (mode === "login") {
@@ -19,6 +31,7 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
 
       if (error) {
         setMessage(error.message);
+        setLoading(false);
         return;
       }
 
@@ -32,30 +45,23 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
       email,
       password,
       options: {
-        data: { name },
+        data: {
+          name,
+        },
         emailRedirectTo: `${window.location.origin}/login`,
       },
     });
 
     if (error) {
       setMessage(error.message);
+      setLoading(false);
       return;
     }
 
-    if (data.user) {
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .upsert({
-          id: data.user.id,
-          name,
-          email,
-          role: "driver",
-        });
-
-      if (profileError) {
-        setMessage(`Account created, but profile setup failed: ${profileError.message}`);
-        return;
-      }
+    if (!data.user) {
+      setMessage("Account creation failed. Please try again.");
+      setLoading(false);
+      return;
     }
 
     setMessage(
@@ -63,6 +69,8 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
         ? "Registration successful. You are now logged in."
         : "Registration successful. Please check your email and confirm your account."
     );
+
+    setLoading(false);
   }
 
   return (
@@ -70,13 +78,24 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
       {mode === "register" && (
         <label>
           Name
-          <input className="input" name="name" required />
+          <input
+            className="input"
+            name="name"
+            required
+            disabled={loading}
+          />
         </label>
       )}
 
       <label>
         Email address
-        <input className="input" name="email" type="email" required />
+        <input
+          className="input"
+          name="email"
+          type="email"
+          required
+          disabled={loading}
+        />
       </label>
 
       <label>
@@ -87,11 +106,22 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
           type="password"
           minLength={6}
           required
+          disabled={loading}
         />
       </label>
 
-      <button className="btn space" type="submit">
-        {mode === "login" ? "Login" : "Create account"}
+      <button
+        className="btn space"
+        type="submit"
+        disabled={loading}
+      >
+        {loading
+          ? mode === "login"
+            ? "Logging in..."
+            : "Creating account..."
+          : mode === "login"
+          ? "Login"
+          : "Create account"}
       </button>
 
       {message && <p className="space">{message}</p>}
