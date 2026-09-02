@@ -301,3 +301,23 @@ body {
 
   pointer-events: none;
 }
+
+.navArea {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-left: auto;
+}
+
+.navs {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.navActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: 4px;
+}
