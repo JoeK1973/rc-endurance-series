@@ -20,21 +20,98 @@ export default function AuthNav() {
 
     async function loadUnreadCount(userId: string) {
       /*
-        Count messages sent TO the logged-in user
-        that have not been read yet.
-      */
-      const { count, error } = await supabase
+       * Find teams managed by this user.
+       * This allows team managers to see conversations
+       * involving their teams.
+       */
+      const { data: myTeams } = await supabase
+        .from("teams")
+        .select("id")
+        .eq("manager_id", userId);
+
+      const teamIds = (myTeams || []).map(
+        (team: any) => team.id
+      );
+
+      /*
+       * Find conversations involving this user.
+       *
+       * A user can be:
+       * - the driver in a conversation
+       * - the manager of the team in a conversation
+       */
+      let conversationQuery = supabase
+        .from("conversations")
+        .select("id, driver_id, team_id")
+        .eq("driver_id", userId);
+
+      if (teamIds.length > 0) {
+        conversationQuery = supabase
+          .from("conversations")
+          .select("id, driver_id, team_id")
+          .or(
+            `driver_id.eq.${userId},team_id.in.(${teamIds.join(",")})`
+          );
+      }
+
+      const {
+        data: conversations,
+        error: conversationError,
+      } = await conversationQuery;
+
+      if (conversationError) {
+        console.error(
+          "Could not load conversations:",
+          conversationError.message
+        );
+
+        setUnreadCount(0);
+        return;
+      }
+
+      const conversationIds = (conversations || []).map(
+        (conversation: any) => conversation.id
+      );
+
+      if (!conversationIds.length) {
+        setUnreadCount(0);
+        return;
+      }
+
+      /*
+       * Count messages that:
+       *
+       * 1. Belong to one of the user's conversations
+       * 2. Were NOT sent by the logged-in user
+       * 3. Have not been read yet
+       */
+      const {
+        count,
+        error: messageError,
+      } = await supabase
         .from("messages")
-        .select("*", {
+        .select("id", {
           count: "exact",
           head: true,
         })
-        .eq("recipient_id", userId)
-        .eq("is_read", false);
+        .in(
+          "conversation_id",
+          conversationIds
+        )
+        .neq("sender_id", userId)
+        .is("read_at", null);
 
-      if (!error) {
-        setUnreadCount(count || 0);
+      if (messageError) {
+        console.error(
+          "Could not count unread messages:",
+          messageError.message
+        );
+
+        setUnreadCount(0);
+        return;
       }
+
+      setUnreadCount(count || 0);
     }
 
     async function load() {
@@ -49,7 +126,9 @@ export default function AuthNav() {
         return;
       }
 
-      const { data: profile } = await supabase
+      const {
+        data: profile,
+      } = await supabase
         .from("profiles")
         .select("role")
         .eq("id", user.id)
@@ -68,14 +147,65 @@ export default function AuthNav() {
 
     load();
 
+    /*
+     * Reload when authentication changes.
+     */
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(() => {
       load();
     });
 
+    /*
+     * Listen for new messages in real time.
+     *
+     * When a new message is received, reload the
+     * unread count.
+     */
+    const channel = supabase
+      .channel("unread-message-count")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "messages",
+        },
+        async () => {
+          const {
+            data: { user },
+          } = await supabase.auth.getUser();
+
+          if (user) {
+            await loadUnreadCount(user.id);
+          }
+        }
+      )
+      .subscribe();
+
+    /*
+     * Also refresh occasionally in case Realtime
+     * is not enabled for the messages table.
+     */
+    const interval = setInterval(
+      async () => {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        if (user) {
+          await loadUnreadCount(user.id);
+        }
+      },
+      30000
+    );
+
     return () => {
       subscription.unsubscribe();
+
+      supabase.removeChannel(channel);
+
+      clearInterval(interval);
     };
   }, []);
 
@@ -101,29 +231,43 @@ export default function AuthNav() {
     state.role === "team_manager" ||
     state.role === "admin";
 
-  const isAdmin = state.role === "admin";
+  const isAdmin =
+    state.role === "admin";
 
   return (
     <>
-      <Link className="nav" href="/driver-area">
+      <Link
+        className="nav"
+        href="/driver-area"
+      >
         Driver Area
       </Link>
 
       {isTeamManager && (
-        <Link className="nav" href="/teams">
+        <Link
+          className="nav"
+          href="/teams"
+        >
           Team Area
         </Link>
       )}
 
       {/* MESSAGES ICON */}
+
       <Link
         className="messageIconButton"
         href="/messages"
-        aria-label="Messages"
+        aria-label={
+          unreadCount > 0
+            ? `Messages - ${unreadCount} unread`
+            : "Messages"
+        }
         title={
           unreadCount > 0
             ? `${unreadCount} unread message${
-                unreadCount === 1 ? "" : "s"
+                unreadCount === 1
+                  ? ""
+                  : "s"
               }`
             : "Messages"
         }
@@ -132,9 +276,15 @@ export default function AuthNav() {
           viewBox="0 0 24 24"
           aria-hidden="true"
         >
-          <path d="M3 5.5A2.5 2.5 0 0 1 5.5 3h13A2.5 2.5 0 0 1 21 5.5v13a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 18.5v-13Z" />
+          <rect
+            x="3"
+            y="5"
+            width="18"
+            height="14"
+            rx="2"
+          />
 
-          <path d="m4 6 8 6 8-6" />
+          <path d="M3 7l9 6 9-6" />
         </svg>
 
         {unreadCount > 0 && (
@@ -147,7 +297,10 @@ export default function AuthNav() {
       </Link>
 
       {isAdmin && (
-        <Link className="nav" href="/admin">
+        <Link
+          className="nav"
+          href="/admin"
+        >
           Admin
         </Link>
       )}
@@ -155,7 +308,10 @@ export default function AuthNav() {
       <button
         className="linkButton"
         onClick={async () => {
-          await createClient().auth.signOut();
+          await createClient()
+            .auth
+            .signOut();
+
           window.location.href = "/";
         }}
       >
