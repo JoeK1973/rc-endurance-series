@@ -221,3 +221,78 @@ body {
 .themeToggle svg circle {
   fill: currentColor;
 }
+
+/* =========================================
+   MESSAGE ICON + UNREAD BADGE
+========================================= */
+
+.messageIconButton {
+  position: relative;
+
+  width: 42px;
+  height: 42px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  color: var(--text);
+
+  border: 1px solid var(--border);
+  border-radius: 10px;
+
+  background: var(--surface-alt);
+
+  text-decoration: none;
+
+  transition:
+    transform 0.15s ease,
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+
+.messageIconButton:hover {
+  transform: scale(1.05);
+  border-color: var(--text);
+}
+
+.messageIconButton svg {
+  width: 21px;
+  height: 21px;
+
+  fill: none;
+  stroke: currentColor;
+
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.unreadBadge {
+  position: absolute;
+
+  top: -7px;
+  right: -7px;
+
+  min-width: 19px;
+  height: 19px;
+
+  padding: 0 5px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #e53935;
+  color: white;
+
+  border-radius: 999px;
+
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+
+  border: 2px solid var(--header);
+
+  pointer-events: none;
+}
