@@ -14,14 +14,18 @@ export default function RootLayout({
       <body>
         <header className="siteHeader">
           <div className="wrap head">
-            <Link className="brand" href="/">
-              <span className="brandRC">RC</span>
-              <span className="brandWords">
-                ENDURANCE
-                <br />
-                SERIES
-              </span>
-              <span className="brandFlag">▰▰▰</span>
+            <Link className="brand brandLogo" href="/">
+              <img
+                src="/logo-light.png"
+                alt="RC Endurance Racing"
+                className="logoImage logoLight"
+              />
+
+              <img
+                src="/logo-dark.png"
+                alt="RC Endurance Racing"
+                className="logoImage logoDark"
+              />
             </Link>
 
             <div className="navArea">
