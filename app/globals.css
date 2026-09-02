@@ -321,3 +321,26 @@ body {
   gap: 10px;
   margin-left: 4px;
 }
+/* =========================================
+   LIGHT / DARK MODE LOGO SWITCHING
+========================================= */
+
+/* Default: light mode */
+
+.logoLight {
+  display: block;
+}
+
+.logoDark {
+  display: none;
+}
+
+/* Dark mode */
+
+:root[data-theme="dark"] .logoLight {
+  display: none;
+}
+
+:root[data-theme="dark"] .logoDark {
+  display: block;
+}
