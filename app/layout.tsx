@@ -1,7 +1,7 @@
 import "./globals.css";
 import Link from "next/link";
-import Image from "next/image";
 import AuthNav from "@/components/AuthNav";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function RootLayout({
   children,
@@ -13,36 +13,54 @@ export default function RootLayout({
       <body>
         <header className="siteHeader">
           <div className="wrap head">
-            <Link
-              className="brand brandLogo"
-              href="/"
-              aria-label="RC Endurance Racing - Home"
-            >
-              <Image
-                src="/logo.png"
-                alt="RC Endurance Racing"
-                width={420}
-                height={200}
-                priority
-                className="logoImage"
-              />
+            <Link className="brand" href="/">
+              <span className="brandRC">RC</span>
+
+              <span className="brandWords">
+                ENDURANCE
+                <br />
+                SERIES
+              </span>
+
+              <span className="brandFlag">
+                ▰▰▰
+              </span>
             </Link>
 
             <nav className="navs">
-              <Link className="nav" href="/">
+              <Link
+                className="nav"
+                href="/"
+              >
                 Home
               </Link>
 
-              <Link className="nav" href="/championship">
+              <Link
+                className="nav"
+                href="/championship"
+              >
                 Series Details
+              </Link>
+
+              <Link
+                className="nav"
+                href="/teams"
+              >
+                Teams
               </Link>
 
               <AuthNav />
             </nav>
+
+            <div className="themeToggleArea">
+              <ThemeToggle />
+            </div>
           </div>
         </header>
 
-        <main className="main">{children}</main>
+        <main className="main">
+          {children}
+        </main>
       </body>
     </html>
   );
