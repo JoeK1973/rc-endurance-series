@@ -1,0 +1,309 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return signedIn()
+        && get(
+          /databases/$(database)/documents/profiles/$(request.auth.uid)
+        ).data.role == "admin";
+    }
+
+    function isTeamManager(teamId) {
+      return signedIn()
+        && get(
+          /databases/$(database)/documents/teams/$(teamId)
+        ).data.manager_id == request.auth.uid;
+    }
+
+    function isConversationParticipant(conversationId) {
+      return signedIn()
+        && (
+          get(
+            /databases/$(database)/documents/conversations/$(conversationId)
+          ).data.driver_id == request.auth.uid
+          ||
+          isTeamManager(
+            get(
+              /databases/$(database)/documents/conversations/$(conversationId)
+            ).data.team_id
+          )
+          ||
+          isAdmin()
+        );
+    }
+
+
+    // =========================================================
+    // PROFILES
+    // =========================================================
+
+match /profiles/{userId} {
+  allow read: if signedIn();
+
+  allow create: if signedIn()
+    && request.auth.uid == userId
+    && request.resource.data.get("role", "driver") != "admin";
+
+  allow update: if signedIn()
+    && request.auth.uid == userId
+    && (
+      request.resource.data.get("role", resource.data.get("role", "driver"))
+        == resource.data.get("role", "driver")
+      ||
+      (
+        resource.data.get("role", "driver") == "driver"
+        && request.resource.data.get("role", "driver") == "team_manager"
+      )
+    );
+
+  allow delete: if isAdmin();
+}
+
+
+    // =========================================================
+    // DRIVERS
+    // =========================================================
+
+    match /drivers/{driverId} {
+
+      allow read: if signedIn();
+
+      allow create: if signedIn()
+        && request.auth.uid == request.resource.data.profile_id;
+
+      allow update: if signedIn()
+        && request.auth.uid == resource.data.profile_id
+        && request.resource.data.profile_id == resource.data.profile_id;
+
+      allow delete: if isAdmin()
+        || (
+          signedIn()
+          && request.auth.uid == resource.data.profile_id
+        );
+    }
+
+
+    // =========================================================
+    // ROUNDS
+    // =========================================================
+
+    match /rounds/{roundId} {
+
+      allow read: if signedIn();
+
+      allow create, update, delete: if isAdmin();
+    }
+
+
+    // =========================================================
+    // DRIVER AVAILABILITY
+    // =========================================================
+
+    match /driver_availability/{availabilityId} {
+
+      allow read: if signedIn();
+
+      allow create: if signedIn()
+        && request.auth.uid == request.resource.data.driver_id;
+
+      allow update: if signedIn()
+        && request.auth.uid == resource.data.driver_id
+        && request.resource.data.driver_id == resource.data.driver_id;
+
+      allow delete: if signedIn()
+        && request.auth.uid == resource.data.driver_id;
+    }
+
+
+    // =========================================================
+    // TEAMS
+    // =========================================================
+
+    match /teams/{teamId} {
+
+      allow read: if signedIn();
+
+      allow create: if signedIn()
+        && request.resource.data.manager_id == request.auth.uid;
+
+      allow update: if signedIn()
+        && resource.data.manager_id == request.auth.uid
+        && request.resource.data.manager_id == resource.data.manager_id;
+
+      allow delete: if isAdmin()
+        || (
+          signedIn()
+          && resource.data.manager_id == request.auth.uid
+        );
+    }
+
+
+    // =========================================================
+    // TEAM DRIVERS
+    // =========================================================
+
+    match /team_drivers/{membershipId} {
+
+      allow read: if signedIn();
+
+      // Preserve the current application workflow:
+      // - team manager can add a driver
+      // - driver can create their own membership after accepting
+      allow create: if signedIn()
+        && (
+          isTeamManager(request.resource.data.team_id)
+          ||
+          request.resource.data.driver_id == request.auth.uid
+        );
+
+      allow update: if signedIn()
+        && (
+          isTeamManager(resource.data.team_id)
+          ||
+          resource.data.driver_id == request.auth.uid
+        );
+
+      allow delete: if signedIn()
+        && (
+          isTeamManager(resource.data.team_id)
+          ||
+          resource.data.driver_id == request.auth.uid
+        );
+    }
+
+
+    // =========================================================
+    // TEAM SHORTLIST
+    // =========================================================
+
+    match /team_shortlist/{shortlistId} {
+
+      allow read: if signedIn()
+        && resource.data.manager_id == request.auth.uid;
+
+      allow create: if signedIn()
+        && request.resource.data.manager_id == request.auth.uid;
+
+      allow update: if signedIn()
+        && resource.data.manager_id == request.auth.uid
+        && request.resource.data.manager_id == request.auth.uid;
+
+      allow delete: if signedIn()
+        && resource.data.manager_id == request.auth.uid;
+    }
+
+
+    // =========================================================
+    // TEAM DRIVER REQUESTS / INVITATIONS
+    // =========================================================
+
+    match /team_driver_requests/{requestId} {
+
+      allow read: if signedIn()
+        && (
+          resource.data.driver_id == request.auth.uid
+          ||
+          resource.data.manager_id == request.auth.uid
+          ||
+          isAdmin()
+        );
+
+      allow create: if signedIn()
+        && request.resource.data.manager_id == request.auth.uid;
+
+      allow update: if signedIn()
+        && (
+          resource.data.driver_id == request.auth.uid
+          ||
+          resource.data.manager_id == request.auth.uid
+          ||
+          isAdmin()
+        );
+
+      allow delete: if signedIn()
+        && (
+          resource.data.manager_id == request.auth.uid
+          ||
+          isAdmin()
+        );
+    }
+
+
+    // =========================================================
+    // CONVERSATIONS
+    // =========================================================
+
+    match /conversations/{conversationId} {
+
+      allow read: if signedIn()
+        && (
+          resource.data.driver_id == request.auth.uid
+          ||
+          isTeamManager(resource.data.team_id)
+          ||
+          isAdmin()
+        );
+
+      allow create: if signedIn()
+        && (
+          request.resource.data.driver_id == request.auth.uid
+          ||
+          isTeamManager(request.resource.data.team_id)
+          ||
+          isAdmin()
+        );
+
+      allow update: if signedIn()
+        && (
+          resource.data.driver_id == request.auth.uid
+          ||
+          isTeamManager(resource.data.team_id)
+          ||
+          isAdmin()
+        );
+
+      allow delete: if isAdmin();
+    }
+
+
+    // =========================================================
+    // MESSAGES
+    // =========================================================
+
+    match /messages/{messageId} {
+
+      allow read: if isConversationParticipant(
+        resource.data.conversation_id
+      );
+
+      allow create: if signedIn()
+        && request.resource.data.sender_id == request.auth.uid
+        && isConversationParticipant(
+          request.resource.data.conversation_id
+        );
+
+      // Participants may mark messages as read,
+      // but cannot alter the message itself.
+      allow update: if isConversationParticipant(
+          resource.data.conversation_id
+        )
+        && request.resource.data.conversation_id
+             == resource.data.conversation_id
+        && request.resource.data.sender_id
+             == resource.data.sender_id
+        && request.resource.data.body
+             == resource.data.body
+        && request.resource.data.created_at
+             == resource.data.created_at;
+
+      allow delete: if signedIn()
+        && request.auth.uid == resource.data.sender_id;
+    }
+  }
+}
