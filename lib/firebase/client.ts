@@ -27,6 +27,7 @@ import {
   type QueryConstraint,
   type DocumentData,
   serverTimestamp,
+  writeBatch,
 } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -417,6 +418,42 @@ if (idFilter && !or) {
   }
 }
 
+async function approveTeamApplication(application: any) {
+  try {
+    const currentUser = auth.currentUser;
+    if (!currentUser) return { error: new Error("Not authenticated.") };
+
+    const applicationId = String(application.id);
+    const batch = writeBatch(db);
+
+    batch.update(doc(db, "team_applications", applicationId), {
+      status: "approved",
+      reviewed_by: currentUser.uid,
+      reviewed_at: serverTimestamp(),
+      rejection_reason: null,
+    });
+
+    batch.update(doc(db, "profiles", String(application.applicant_id)), {
+      role: "team_manager",
+      team_manager_application_id: applicationId,
+    });
+
+    batch.set(doc(db, "teams", applicationId), {
+      id: applicationId,
+      application_id: applicationId,
+      name: application.team_name,
+      club: application.club || null,
+      manager_id: application.applicant_id,
+      created_at: serverTimestamp(),
+    });
+
+    await batch.commit();
+    return { error: null };
+  } catch (error: any) {
+    return { error: error instanceof Error ? error : new Error(String(error)) };
+  }
+}
+
 function client() {
   return {
     auth: {
@@ -524,6 +561,9 @@ function client() {
         });
         return { data: { subscription: { unsubscribe } } };
       },
+    },
+    admin: {
+      approveTeamApplication,
     },
     from(table: string) {
       return new CompatQuery(table);
