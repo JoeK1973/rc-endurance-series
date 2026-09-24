@@ -31,13 +31,42 @@ export default function ManageTeamsPage() {
     const s = createClient();
     const { data: { user } } = await s.auth.getUser();
     if (!user) { window.location.href = "/login"; return; }
-    const [{ data, error }, { data: teamData }] = await Promise.all([
+    const [{ data, error }, { data: teamData, error: teamError }] = await Promise.all([
       s.from("team_applications").select("*").order("created_at", { ascending: false }),
       s.from("teams").select("id,name,club,manager_id,application_id").order("name"),
     ]);
-    if (error) setMessage(error.message);
-    else setApplications((data || []) as Application[]);
-    setTeams(teamData || []);
+
+    if (error) {
+      setMessage(error.message);
+      setLoading(false);
+      return;
+    }
+
+    if (teamError) {
+      setMessage(teamError.message);
+      setLoading(false);
+      return;
+    }
+
+    setApplications((data || []) as Application[]);
+
+    const teamsWithManagers = await Promise.all(
+      (teamData || []).map(async (team: any) => {
+        const { data: managerProfile } = await s
+          .from("profiles")
+          .select("id,name,email")
+          .eq("id", team.manager_id)
+          .maybeSingle();
+
+        return {
+          ...team,
+          manager_name: managerProfile?.name || null,
+          manager_email: managerProfile?.email || null,
+        };
+      })
+    );
+
+    setTeams(teamsWithManagers);
     setLoading(false);
   }
 
@@ -115,7 +144,15 @@ export default function ManageTeamsPage() {
                 <b>{team.name}</b><br />
                 <span className="muted">Club: {team.club || "Not specified"}</span>
               </div>
-              <span className="muted">Manager: {application?.applicant_name || application?.applicant_email || team.manager_id}</span>
+              <span className="muted">
+                Manager: {
+                  team.manager_name ||
+                  application?.applicant_name ||
+                  application?.applicant_email ||
+                  team.manager_email ||
+                  team.manager_id
+                }
+              </span>
             </div>
           );
         })}
