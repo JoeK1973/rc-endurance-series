@@ -33,6 +33,7 @@ type Availability = {
 };
 
 type TeamDriver = {
+  team_id: string;
   driver_id: string;
   round_id: string;
 };
@@ -90,6 +91,17 @@ export default function TeamsArea({
 
     setUserId(user.id);
 
+    const { data: ownProfile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (!["team_manager", "admin", "superuser"].includes(ownProfile?.role || "")) {
+      window.location.href = "/";
+      return;
+    }
+
     const [
       { data: teamData },
       { data: roundsData },
@@ -123,7 +135,7 @@ export default function TeamsArea({
 
       supabase
         .from("team_drivers")
-        .select("driver_id,round_id"),
+        .select("team_id,driver_id,round_id"),
     ]);
 
     const loadedRounds = (roundsData || []) as Round[];
@@ -230,9 +242,13 @@ if (shortlistData) {
 
   const selectedTeamDrivers = useMemo(() => {
     return teamDrivers
-      .filter((driver) => driver.round_id === roundId)
+      .filter(
+        (driver) =>
+          driver.team_id === teamId &&
+          driver.round_id === roundId
+      )
       .map((driver) => driver.driver_id);
-  }, [teamDrivers, roundId]);
+  }, [teamDrivers, teamId, roundId]);
 
   const pendingRequests = useMemo(() => {
     return teamRequests.filter(
@@ -402,6 +418,7 @@ if (shortlistData) {
         current.filter(
           (driver) =>
             !(
+              driver.team_id === teamId &&
               driver.driver_id === driverId &&
               driver.round_id === roundId
             )
