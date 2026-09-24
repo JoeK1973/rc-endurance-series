@@ -1,1 +1,30 @@
-import Link from"next/link";export default function P(){return <><h1>RC Endurance Series</h1><p>Find drivers, build teams and communicate through internal messaging.</p><div className="grid two"><div className="card"><h2>Drivers Available</h2><Link className="btn" href="/drivers">Find drivers</Link></div><div className="card"><h2>Team Area</h2><Link className="btn" href="/teams">Manage team</Link></div><div className="card"><h2>Messages</h2><Link className="btn" href="/messages">Open inbox</Link></div></div></>}
+import Link from "next/link";
+import TeamRegistrationCard from "@/components/TeamRegistrationCard";
+
+export default function P() {
+  return (
+    <>
+      <h1>RC Endurance Series</h1>
+      <p>Find drivers, build teams and communicate through internal messaging.</p>
+
+      <div className="grid two">
+        <div className="card">
+          <h2>Drivers Available</h2>
+          <Link className="btn" href="/drivers">Find drivers</Link>
+        </div>
+
+        <div className="card">
+          <h2>Team Area</h2>
+          <Link className="btn" href="/teams">Manage team</Link>
+        </div>
+
+        <div className="card">
+          <h2>Messages</h2>
+          <Link className="btn" href="/messages">Open inbox</Link>
+        </div>
+
+        <TeamRegistrationCard />
+      </div>
+    </>
+  );
+}
