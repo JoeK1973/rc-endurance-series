@@ -1,8 +1,10 @@
 import AdminTabs from "@/components/AdminTabs";
+import AdminGuard from "@/components/AdminGuard";
 
 export default function ManageDriversPage() {
   return (
-    <>
+    <AdminGuard>
+      <>
       <h1>Admin</h1>
       <p className="muted">Manage drivers registered for the RC Endurance Series.</p>
       <AdminTabs />
@@ -14,6 +16,7 @@ export default function ManageDriversPage() {
           and can manage their availability from Driver Area.
         </p>
       </div>
-    </>
+      </>
+    </AdminGuard>
   );
 }
