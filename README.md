@@ -71,3 +71,19 @@ The included migration script copies the current application data from Supabase 
 Add the six `NEXT_PUBLIC_FIREBASE_*` variables to the Vercel project and redeploy.
 
 You do not need to move the Next.js hosting to Firebase just because the database/auth backend has moved.
+
+## Team registration and administrator setup
+
+Users can apply to register a team from the homepage. Applications are reviewed in **Admin → Manage Teams**. Approval atomically creates the team and grants the applicant the `team_manager` role.
+
+The `superuser` role is above `admin`. Superusers have all admin permissions and can promote existing registered users to `admin` or remove admin permission in **Admin → Manage Admins**.
+
+### One-time superuser bootstrap
+
+The first superuser must be assigned manually in the Firebase Console. After the intended account has registered and its `profiles/{uid}` document exists, change that profile's `role` field to:
+
+```text
+superuser
+```
+
+Do not create a second superuser unless you deliberately want more than one account with that permission.

@@ -7,11 +7,18 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function role() {
+      return get(
+        /databases/$(database)/documents/profiles/$(request.auth.uid)
+      ).data.get("role", "driver");
+    }
+
+    function isSuperuser() {
+      return signedIn() && role() == "superuser";
+    }
+
     function isAdmin() {
-      return signedIn()
-        && get(
-          /databases/$(database)/documents/profiles/$(request.auth.uid)
-        ).data.role == "admin";
+      return signedIn() && (role() == "admin" || role() == "superuser");
     }
 
     function isTeamManager(teamId) {
@@ -21,57 +28,81 @@ service cloud.firestore {
         ).data.manager_id == request.auth.uid;
     }
 
+    function hasAcceptedInvitation(teamId, driverId, roundId) {
+      return signedIn()
+        && get(
+          /databases/$(database)/documents/team_driver_requests/$(teamId + "_" + driverId + "_" + roundId)
+        ).data.driver_id == driverId
+        && get(
+          /databases/$(database)/documents/team_driver_requests/$(teamId + "_" + driverId + "_" + roundId)
+        ).data.team_id == teamId
+        && get(
+          /databases/$(database)/documents/team_driver_requests/$(teamId + "_" + driverId + "_" + roundId)
+        ).data.round_id == roundId
+        && get(
+          /databases/$(database)/documents/team_driver_requests/$(teamId + "_" + driverId + "_" + roundId)
+        ).data.status == "accepted";
+    }
+
     function isConversationParticipant(conversationId) {
       return signedIn()
         && (
-          get(
-            /databases/$(database)/documents/conversations/$(conversationId)
-          ).data.driver_id == request.auth.uid
-          ||
-          isTeamManager(
-            get(
-              /databases/$(database)/documents/conversations/$(conversationId)
-            ).data.team_id
+          get(/databases/$(database)/documents/conversations/$(conversationId)).data.driver_id == request.auth.uid
+          || isTeamManager(
+            get(/databases/$(database)/documents/conversations/$(conversationId)).data.team_id
           )
-          ||
-          isAdmin()
+          || isAdmin()
         );
     }
 
+    match /profiles/{userId} {
+      allow read: if signedIn();
 
-    // =========================================================
-    // PROFILES
-    // =========================================================
+      allow create: if signedIn()
+        && request.auth.uid == userId
+        && request.resource.data.get("role", "driver") == "driver";
 
-match /profiles/{userId} {
-  allow read: if signedIn();
+      // A user may edit their own profile fields, but cannot change their
+      // role or team-manager application link.
+      allow update: if
+        (
+          signedIn()
+          && request.auth.uid == userId
+          && request.resource.data.get("role", resource.data.get("role", "driver"))
+               == resource.data.get("role", "driver")
+          && request.resource.data.get(
+               "team_manager_application_id",
+               resource.data.get("team_manager_application_id", "")
+             )
+             == resource.data.get("team_manager_application_id", "")
+        )
+        ||
+        // An admin can grant team-manager status only as part of the atomic
+        // approval transaction for that user's approved application.
+        (
+          isAdmin()
+          && resource.data.get("role", "driver") == "driver"
+          && request.resource.data.get("role", "driver") == "team_manager"
+          && request.resource.data.get("team_manager_application_id", "") != ""
+          && getAfter(
+               /databases/$(database)/documents/team_applications/$(request.resource.data.get("team_manager_application_id", ""))
+             ).data.status == "approved"
+          && getAfter(
+               /databases/$(database)/documents/team_applications/$(request.resource.data.get("team_manager_application_id", ""))
+             ).data.applicant_id == userId
+        )
+        ||
+        // Only the superuser can grant or remove admin permission.
+        (
+          isSuperuser()
+          && request.resource.data.get("role", "driver") in ["driver", "admin"]
+          && resource.data.get("role", "driver") in ["driver", "admin"]
+        );
 
-  allow create: if signedIn()
-    && request.auth.uid == userId
-    && request.resource.data.get("role", "driver") != "admin";
-
-  allow update: if signedIn()
-    && request.auth.uid == userId
-    && (
-      request.resource.data.get("role", resource.data.get("role", "driver"))
-        == resource.data.get("role", "driver")
-      ||
-      (
-        resource.data.get("role", "driver") == "driver"
-        && request.resource.data.get("role", "driver") == "team_manager"
-      )
-    );
-
-  allow delete: if isAdmin();
-}
-
-
-    // =========================================================
-    // DRIVERS
-    // =========================================================
+      allow delete: if isAdmin();
+    }
 
     match /drivers/{driverId} {
-
       allow read: if signedIn();
 
       allow create: if signedIn()
@@ -82,31 +113,15 @@ match /profiles/{userId} {
         && request.resource.data.profile_id == resource.data.profile_id;
 
       allow delete: if isAdmin()
-        || (
-          signedIn()
-          && request.auth.uid == resource.data.profile_id
-        );
+        || (signedIn() && request.auth.uid == resource.data.profile_id);
     }
 
-
-    // =========================================================
-    // ROUNDS
-    // =========================================================
-
     match /rounds/{roundId} {
-
       allow read: if signedIn();
-
       allow create, update, delete: if isAdmin();
     }
 
-
-    // =========================================================
-    // DRIVER AVAILABILITY
-    // =========================================================
-
     match /driver_availability/{availabilityId} {
-
       allow read: if signedIn();
 
       allow create: if signedIn()
@@ -120,190 +135,216 @@ match /profiles/{userId} {
         && request.auth.uid == resource.data.driver_id;
     }
 
-
-    // =========================================================
-    // TEAMS
-    // =========================================================
-
-    match /teams/{teamId} {
-
-      allow read: if signedIn();
+    // Team applications are the only way a new team manager is created.
+    match /team_applications/{applicationId} {
+      allow read: if signedIn()
+        && (resource.data.applicant_id == request.auth.uid || isAdmin());
 
       allow create: if signedIn()
-        && request.resource.data.manager_id == request.auth.uid;
+        && request.resource.data.applicant_id == request.auth.uid
+        && request.resource.data.status == "pending"
+        && request.resource.data.team_name is string
+        && request.resource.data.applicant_email is string;
+
+      allow update: if isAdmin()
+        && request.resource.data.applicant_id == resource.data.applicant_id
+        && request.resource.data.team_name == resource.data.team_name
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          "status",
+          "reviewed_by",
+          "reviewed_at",
+          "rejection_reason"
+        ])
+        && (
+          request.resource.data.status == "rejected"
+          || (
+            request.resource.data.status == "approved"
+            && getAfter(
+                 /databases/$(database)/documents/teams/$(applicationId)
+               ).data.application_id == applicationId
+            && getAfter(
+                 /databases/$(database)/documents/teams/$(applicationId)
+               ).data.manager_id == resource.data.applicant_id
+            && getAfter(
+                 /databases/$(database)/documents/profiles/$(resource.data.applicant_id)
+               ).data.role == "team_manager"
+            && getAfter(
+                 /databases/$(database)/documents/profiles/$(resource.data.applicant_id)
+               ).data.team_manager_application_id == applicationId
+          )
+        );
+
+      allow delete: if isAdmin();
+    }
+
+    match /teams/{teamId} {
+      allow read: if signedIn();
+
+      // Team creation is tied atomically to an approved application.
+      allow create: if isAdmin()
+        && request.resource.data.application_id == teamId
+        && getAfter(
+             /databases/$(database)/documents/team_applications/$(teamId)
+           ).data.status == "approved"
+        && getAfter(
+             /databases/$(database)/documents/team_applications/$(teamId)
+           ).data.applicant_id == request.resource.data.manager_id
+        && getAfter(
+             /databases/$(database)/documents/profiles/$(request.resource.data.manager_id)
+           ).data.role == "team_manager"
+        && getAfter(
+             /databases/$(database)/documents/profiles/$(request.resource.data.manager_id)
+           ).data.team_manager_application_id == teamId;
 
       allow update: if signedIn()
         && resource.data.manager_id == request.auth.uid
         && request.resource.data.manager_id == resource.data.manager_id;
 
       allow delete: if isAdmin()
-        || (
-          signedIn()
-          && resource.data.manager_id == request.auth.uid
-        );
+        || (signedIn() && resource.data.manager_id == request.auth.uid);
     }
 
-
-    // =========================================================
-    // TEAM DRIVERS
-    // =========================================================
-
     match /team_drivers/{membershipId} {
-
       allow read: if signedIn();
 
-      // Preserve the current application workflow:
-      // - team manager can add a driver
-      // - driver can create their own membership after accepting
       allow create: if signedIn()
         && (
           isTeamManager(request.resource.data.team_id)
-          ||
-          request.resource.data.driver_id == request.auth.uid
+          || (
+            request.resource.data.driver_id == request.auth.uid
+            && hasAcceptedInvitation(
+              request.resource.data.team_id,
+              request.resource.data.driver_id,
+              request.resource.data.round_id
+            )
+          )
         );
 
       allow update: if signedIn()
         && (
-          isTeamManager(resource.data.team_id)
+          (
+            isTeamManager(resource.data.team_id)
+            && request.resource.data.team_id == resource.data.team_id
+            && request.resource.data.driver_id == resource.data.driver_id
+            && request.resource.data.round_id == resource.data.round_id
+          )
           ||
-          resource.data.driver_id == request.auth.uid
+          (
+            resource.data.driver_id == request.auth.uid
+            && request.resource.data.team_id == resource.data.team_id
+            && request.resource.data.driver_id == resource.data.driver_id
+            && request.resource.data.round_id == resource.data.round_id
+          )
         );
 
-      allow delete: if signedIn()
-        && (
-          isTeamManager(resource.data.team_id)
-          ||
-          resource.data.driver_id == request.auth.uid
+      allow delete: if isAdmin()
+        || (
+          signedIn()
+          && (
+            isTeamManager(resource.data.team_id)
+            || resource.data.driver_id == request.auth.uid
+          )
         );
     }
 
-
-    // =========================================================
-    // TEAM SHORTLIST
-    // =========================================================
-
     match /team_shortlist/{shortlistId} {
-
-      allow read: if signedIn()
-        && resource.data.manager_id == request.auth.uid;
+      allow read: if signedIn() && resource.data.manager_id == request.auth.uid;
 
       allow create: if signedIn()
         && request.resource.data.manager_id == request.auth.uid;
 
       allow update: if signedIn()
         && resource.data.manager_id == request.auth.uid
-        && request.resource.data.manager_id == request.auth.uid;
+        && request.resource.data.manager_id == request.auth.uid
+        && request.resource.data.driver_id == resource.data.driver_id;
 
-      allow delete: if signedIn()
-        && resource.data.manager_id == request.auth.uid;
+      allow delete: if signedIn() && resource.data.manager_id == request.auth.uid;
     }
 
-
-    // =========================================================
-    // TEAM DRIVER REQUESTS / INVITATIONS
-    // =========================================================
-
     match /team_driver_requests/{requestId} {
-
       allow read: if signedIn()
         && (
           resource.data.driver_id == request.auth.uid
-          ||
-          resource.data.manager_id == request.auth.uid
-          ||
-          isAdmin()
+          || resource.data.manager_id == request.auth.uid
+          || isAdmin()
         );
 
       allow create: if signedIn()
-        && request.resource.data.manager_id == request.auth.uid;
+        && request.resource.data.manager_id == request.auth.uid
+        && isTeamManager(request.resource.data.team_id);
 
       allow update: if signedIn()
         && (
-          resource.data.driver_id == request.auth.uid
+          (
+            resource.data.driver_id == request.auth.uid
+            && request.resource.data.driver_id == resource.data.driver_id
+            && request.resource.data.team_id == resource.data.team_id
+            && request.resource.data.round_id == resource.data.round_id
+            && request.resource.data.manager_id == resource.data.manager_id
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+              "status",
+              "responded_at"
+            ])
+          )
           ||
-          resource.data.manager_id == request.auth.uid
-          ||
-          isAdmin()
+          (
+            resource.data.manager_id == request.auth.uid
+            && request.resource.data.driver_id == resource.data.driver_id
+            && request.resource.data.team_id == resource.data.team_id
+            && request.resource.data.round_id == resource.data.round_id
+            && request.resource.data.manager_id == resource.data.manager_id
+          )
+          || isAdmin()
         );
 
       allow delete: if signedIn()
-        && (
-          resource.data.manager_id == request.auth.uid
-          ||
-          isAdmin()
-        );
+        && (resource.data.manager_id == request.auth.uid || isAdmin());
     }
 
-
-    // =========================================================
-    // CONVERSATIONS
-    // =========================================================
-
     match /conversations/{conversationId} {
-
       allow read: if signedIn()
         && (
           resource.data.driver_id == request.auth.uid
-          ||
-          isTeamManager(resource.data.team_id)
-          ||
-          isAdmin()
+          || isTeamManager(resource.data.team_id)
+          || isAdmin()
         );
 
       allow create: if signedIn()
         && (
           request.resource.data.driver_id == request.auth.uid
-          ||
-          isTeamManager(request.resource.data.team_id)
-          ||
-          isAdmin()
+          || isTeamManager(request.resource.data.team_id)
+          || isAdmin()
         );
 
       allow update: if signedIn()
         && (
           resource.data.driver_id == request.auth.uid
-          ||
-          isTeamManager(resource.data.team_id)
-          ||
-          isAdmin()
-        );
+          || isTeamManager(resource.data.team_id)
+          || isAdmin()
+        )
+        && request.resource.data.driver_id == resource.data.driver_id
+        && request.resource.data.team_id == resource.data.team_id
+        && request.resource.data.round_id == resource.data.round_id
+        && request.resource.data.manager_id == resource.data.manager_id;
 
       allow delete: if isAdmin();
     }
 
-
-    // =========================================================
-    // MESSAGES
-    // =========================================================
-
     match /messages/{messageId} {
-
-      allow read: if isConversationParticipant(
-        resource.data.conversation_id
-      );
+      allow read: if isConversationParticipant(resource.data.conversation_id);
 
       allow create: if signedIn()
         && request.resource.data.sender_id == request.auth.uid
-        && isConversationParticipant(
-          request.resource.data.conversation_id
-        );
+        && isConversationParticipant(request.resource.data.conversation_id);
 
-      // Participants may mark messages as read,
-      // but cannot alter the message itself.
-      allow update: if isConversationParticipant(
-          resource.data.conversation_id
-        )
-        && request.resource.data.conversation_id
-             == resource.data.conversation_id
-        && request.resource.data.sender_id
-             == resource.data.sender_id
-        && request.resource.data.body
-             == resource.data.body
-        && request.resource.data.created_at
-             == resource.data.created_at;
+      allow update: if isConversationParticipant(resource.data.conversation_id)
+        && request.resource.data.conversation_id == resource.data.conversation_id
+        && request.resource.data.sender_id == resource.data.sender_id
+        && request.resource.data.body == resource.data.body
+        && request.resource.data.created_at == resource.data.created_at
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["read_at"]);
 
-      allow delete: if signedIn()
-        && request.auth.uid == resource.data.sender_id;
+      allow delete: if signedIn() && request.auth.uid == resource.data.sender_id;
     }
   }
 }
