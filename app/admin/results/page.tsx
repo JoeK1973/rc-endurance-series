@@ -1,1 +1,3 @@
-1
+import ManageResultsPage from "@/components/AdminResults";
+
+export default ManageResultsPage;
