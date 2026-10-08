@@ -223,7 +223,12 @@ export default function BodyshellChat({
 
         if (result.error) throw result.error;
         if (result.data) {
-          setMessages((current) => [...current, result.data as Message]);
+          setMessages((current) => {
+            const next = result.data as Message;
+            return current.some((message) => message.id === next.id)
+              ? current
+              : [...current, next];
+          });
         }
       }
 
@@ -246,7 +251,12 @@ export default function BodyshellChat({
 
         if (result.error) throw result.error;
         if (result.data) {
-          setMessages((current) => [...current, result.data as Message]);
+          setMessages((current) => {
+            const next = result.data as Message;
+            return current.some((message) => message.id === next.id)
+              ? current
+              : [...current, next];
+          });
         }
       }
 
