@@ -67,13 +67,18 @@ export default function AdminSettings() {
         </p>
       </div>
 
-      <div className="card">
-        <h2>Reset livery submissions</h2>
-        <p className="muted">
-          Remove the agreed livery from every team and require a new
-          submission. Existing bodyshell conversations and image history are
-          not deleted.
-        </p>
+      <div className="card adminDangerCard">
+        <div className="adminDangerHeader">
+          <div>
+            <h2>Reset livery submissions</h2>
+            <p className="muted">
+              Remove the agreed livery from every team and require a new
+              submission. Existing bodyshell conversations and image history are
+              not deleted.
+            </p>
+          </div>
+          <span className="status reset">Destructive action</span>
+        </div>
 
         <button
           className="btn danger"

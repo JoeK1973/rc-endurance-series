@@ -96,24 +96,21 @@ export default function AdminBodyshells() {
           {teams.map((team) => (
             <button
               key={team.id}
-              className={`btn ${
-                selected?.id === team.id ? "" : "secondary"
+              className={`bodyshellTeamButton ${
+                selected?.id === team.id ? "selected" : ""
               }`}
-              style={{
-                width: "100%",
-                textAlign: "left",
-                marginBottom: 8,
-              }}
               onClick={() => setSelected(team)}
             >
-              <b>{team.name}</b>
-              <br />
-              <small>
-                {profiles[team.manager_id]?.name || "Team manager"} ·{" "}
+              <span className="bodyshellTeamName">{team.name}</span>
+              <span
+                className={`bodyshellStatus ${
+                  team.approved_livery_url ? "approved" : "pending"
+                }`}
+              >
                 {team.approved_livery_url
                   ? "Livery approved"
                   : "Awaiting approval"}
-              </small>
+              </span>
             </button>
           ))}
         </div>

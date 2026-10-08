@@ -326,19 +326,19 @@ export default function BodyshellChat({
         </p>
 
         {approvedLiveryUrl ? (
-          <div className="space">
-            <h3>Agreed Livery</h3>
+          <div className="bodyshellApproved">
+            <div className="bodyshellApprovedHeader">
+              <div>
+                <h3>Agreed Livery</h3>
+                <p className="muted">This is the livery currently approved by the championship admins.</p>
+              </div>
+              <span className="bodyshellStatus approved">Approved</span>
+            </div>
             <a href={approvedLiveryUrl} target="_blank" rel="noreferrer">
               <img
                 src={approvedLiveryUrl}
                 alt="Agreed team livery"
-                style={{
-                  maxWidth: "100%",
-                  width: 300,
-                  height: "auto",
-                  borderRadius: 8,
-                  display: "block",
-                }}
+                className="bodyshellApprovedImage"
               />
             </a>
           </div>

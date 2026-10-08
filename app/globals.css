@@ -1212,6 +1212,118 @@ textarea:focus {
 
 
 /* ========================================
+   BODYSHELL UI
+======================================== */
+
+.bodyshellTeamButton {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+  padding: 13px 14px;
+  text-align: left;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+.bodyshellTeamButton:hover {
+  border-color: var(--blue);
+  background: var(--surface-hover);
+  transform: translateY(-1px);
+}
+
+.bodyshellTeamButton.selected {
+  border-color: var(--blue);
+  background: var(--tab-active-bg);
+  box-shadow: 0 2px 5px rgba(29, 44, 66, 0.08);
+}
+
+.bodyshellTeamName {
+  font-weight: 800;
+  color: var(--text-strong);
+}
+
+.bodyshellStatus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 750;
+}
+
+.bodyshellStatus.approved {
+  background: #e8f7ed;
+  color: #166534;
+}
+
+.bodyshellStatus.pending {
+  background: #fff4db;
+  color: #8a5300;
+}
+
+.bodyshellApproved {
+  margin-top: 18px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-alt);
+}
+
+.bodyshellApprovedHeader,
+.adminDangerHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.bodyshellApprovedHeader h3,
+.adminDangerHeader h2 {
+  margin-top: 0;
+}
+
+.bodyshellApprovedHeader p {
+  margin-bottom: 0;
+}
+
+.bodyshellApprovedImage {
+  max-width: 100%;
+  width: 300px;
+  height: auto;
+  border-radius: 8px;
+  display: block;
+  margin-top: 14px;
+}
+
+.adminDangerCard {
+  border-color: #e2b8bb;
+}
+
+:root[data-theme="dark"] .bodyshellStatus.approved {
+  background: #163725;
+  color: #9ee6b8;
+}
+
+:root[data-theme="dark"] .bodyshellStatus.pending {
+  background: #3a2b13;
+  color: #ffd08a;
+}
+
+:root[data-theme="dark"] .adminDangerCard {
+  border-color: #71333a;
+}
+
+/* ========================================
    RESPONSIVE - TABLET
 ======================================== */
 
@@ -1294,6 +1406,16 @@ textarea:focus {
 
 
 @media (max-width: 500px) {
+  .bodyshellTeamButton,
+  .bodyshellApprovedHeader,
+  .adminDangerHeader {
+    align-items: flex-start;
+  }
+
+  .bodyshellTeamButton {
+    flex-direction: column;
+  }
+
   h1 {
     font-size: 27px;
   }
