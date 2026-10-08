@@ -74,9 +74,12 @@ export default function AuthNav() {
 
   const isTeamManager =
     state.role === "team_manager" ||
-    state.role === "admin";
+    state.role === "admin" ||
+    state.role === "superuser";
 
-  const isAdmin = state.role === "admin";
+  const isAdmin =
+    state.role === "admin" ||
+    state.role === "superuser";
 
   return (
     <>
