@@ -1,0 +1,26 @@
+RC ENDURANCE SERIES - BODYSHELL FEATURE
+
+1. Extract this project over your current project / use these files for the GitHub main branch.
+
+2. Vercel environment variables REQUIRED for image upload:
+   IMAGEKIT_PUBLIC_KEY=your ImageKit Public API Key
+   IMAGEKIT_PRIVATE_KEY=your ImageKit Private API Key
+
+   DO NOT put the private key in GitHub or commit .env.local.
+
+3. The existing Firebase environment variables stay unchanged.
+
+4. ImageKit is used for bodyshell images. Firebase Storage is NOT required.
+
+5. Deploy the updated firestore.rules to Firebase:
+   firebase deploy --only firestore:rules
+
+6. Commit/push the project to GitHub main. Vercel should then deploy it.
+
+7. After Vercel has the two ImageKit variables, redeploy from Vercel (or push a no-op commit).
+
+New Team Area tab: Submit Bodyshell
+New Admin tabs: Manage Bodyshells and Settings
+
+Images: JPG/JPEG/PNG, maximum 5 MB. Images are stored in ImageKit under
+/rc-endurance/bodyshells/{teamId}.

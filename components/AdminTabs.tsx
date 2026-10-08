@@ -9,6 +9,8 @@ const tabs = [
   { href: "/admin/teams", label: "Manage Teams" },
   { href: "/admin/results", label: "Manage Results" },
   { href: "/admin/admins", label: "Manage Admins" },
+  { href: "/admin/bodyshells", label: "Manage Bodyshells" },
+  { href: "/admin/settings", label: "Settings" },
 ];
 
 export default function AdminTabs() {

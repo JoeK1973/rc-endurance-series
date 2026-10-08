@@ -3,8 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/firebase/client";
+import BodyshellArea from "@/components/BodyshellArea";
 
-type Tab = "dashboard" | "find" | "team" | "shortlist";
+type Tab = "dashboard" | "find" | "team" | "shortlist" | "bodyshell";
 
 type Round = {
   id: string;
@@ -33,7 +34,6 @@ type Availability = {
 };
 
 type TeamDriver = {
-  team_id: string;
   driver_id: string;
   round_id: string;
 };
@@ -91,17 +91,6 @@ export default function TeamsArea({
 
     setUserId(user.id);
 
-    const { data: ownProfile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .maybeSingle();
-
-    if (!["team_manager", "admin", "superuser"].includes(ownProfile?.role || "")) {
-      window.location.href = "/";
-      return;
-    }
-
     const [
       { data: teamData },
       { data: roundsData },
@@ -135,7 +124,7 @@ export default function TeamsArea({
 
       supabase
         .from("team_drivers")
-        .select("team_id,driver_id,round_id"),
+        .select("driver_id,round_id"),
     ]);
 
     const loadedRounds = (roundsData || []) as Round[];
@@ -242,13 +231,9 @@ if (shortlistData) {
 
   const selectedTeamDrivers = useMemo(() => {
     return teamDrivers
-      .filter(
-        (driver) =>
-          driver.team_id === teamId &&
-          driver.round_id === roundId
-      )
+      .filter((driver) => driver.round_id === roundId)
       .map((driver) => driver.driver_id);
-  }, [teamDrivers, teamId, roundId]);
+  }, [teamDrivers, roundId]);
 
   const pendingRequests = useMemo(() => {
     return teamRequests.filter(
@@ -418,7 +403,6 @@ if (shortlistData) {
         current.filter(
           (driver) =>
             !(
-              driver.team_id === teamId &&
               driver.driver_id === driverId &&
               driver.round_id === roundId
             )
@@ -482,6 +466,7 @@ if (shortlistData) {
     ["dashboard", "Dashboard"],
     ["find", "Find a Driver"],
     ["team", "My Team"],
+    ["bodyshell", "Submit Bodyshell"],
     ["shortlist", "My Shortlist"],
   ];
 
@@ -929,6 +914,10 @@ if (shortlistData) {
             </>
           )}
         </div>
+      )}
+
+      {tab === "bodyshell" && (
+        <BodyshellArea />
       )}
 
       {tab === "shortlist" && (
