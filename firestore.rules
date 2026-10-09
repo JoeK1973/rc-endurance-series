@@ -11,7 +11,7 @@ service cloud.firestore {
       return signedIn()
         && get(
           /databases/$(database)/documents/profiles/$(request.auth.uid)
-        ).data.role == "admin";
+        ).data.role in ["admin", "superuser"];
     }
 
     function isTeamManager(teamId) {
@@ -100,6 +100,12 @@ match /profiles/{userId} {
       allow create, update, delete: if isAdmin();
     }
 
+    // Registration/payment records are only accessed through authenticated server API routes.
+    // The Admin SDK bypasses these rules; clients cannot forge payment or registration status.
+    match /round_registrations/{registrationId} {
+      allow read, create, update, delete: if false;
+    }
+
 
     // =========================================================
     // DRIVER AVAILABILITY
@@ -126,41 +132,31 @@ match /profiles/{userId} {
     // =========================================================
 
     match /teams/{teamId} {
-
       allow read: if signedIn();
 
-      allow create: if signedIn()
-        && request.resource.data.manager_id == request.auth.uid;
+      allow create: if isAdmin()
+        && request.resource.data.application_id == teamId
+        && getAfter(/databases/$(database)/documents/team_applications/$(teamId)).data.status == "approved"
+        && getAfter(/databases/$(database)/documents/team_applications/$(teamId)).data.applicant_id == request.resource.data.manager_id
+        && getAfter(/databases/$(database)/documents/profiles/$(request.resource.data.manager_id)).data.role == "team_manager"
+        && getAfter(/databases/$(database)/documents/profiles/$(request.resource.data.manager_id)).data.team_manager_application_id == teamId;
 
       allow update: if
         (
           signedIn()
           && resource.data.manager_id == request.auth.uid
-          && request.resource.data.manager_id == resource.data.manager_id
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-            "name",
-            "club"
-          ])
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["name", "club"])
         )
         ||
         (
           isAdmin()
-          && request.resource.data.manager_id == resource.data.manager_id
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-            "livery_status",
-            "approved_livery_url",
-            "approved_livery_thumbnail_url",
-            "approved_livery_message_id",
-            "livery_approved_at",
-            "livery_reset_at"
+            "livery_status", "approved_livery_url", "approved_livery_thumbnail_url",
+            "approved_livery_message_id", "livery_approved_at", "livery_reset_at"
           ])
         );
 
-      allow delete: if isAdmin()
-        || (
-          signedIn()
-          && resource.data.manager_id == request.auth.uid
-        );
+      allow delete: if isAdmin() || (signedIn() && resource.data.manager_id == request.auth.uid);
     }
 
 

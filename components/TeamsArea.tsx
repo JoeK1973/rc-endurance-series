@@ -4,8 +4,9 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/firebase/client";
 import BodyshellArea from "@/components/BodyshellArea";
+import RegistrationArea from "@/components/RegistrationArea";
 
-type Tab = "dashboard" | "find" | "team" | "shortlist" | "bodyshell";
+type Tab = "dashboard" | "find" | "team" | "shortlist" | "bodyshell" | "registration";
 
 type Round = {
   id: string;
@@ -177,6 +178,8 @@ if (shortlistData) {
 
   useEffect(() => {
     load();
+    const params = new URLSearchParams(window.location.search);
+    if (params.has("registration")) setTab("registration");
   }, []);
 
   const driverCards = useMemo(() => {
@@ -466,6 +469,7 @@ if (shortlistData) {
     ["dashboard", "Dashboard"],
     ["find", "Find a Driver"],
     ["team", "My Team"],
+    ["registration", "Round Registration"],
     ["bodyshell", "Submit Bodyshell"],
     ["shortlist", "My Shortlist"],
   ];
@@ -915,6 +919,8 @@ if (shortlistData) {
           )}
         </div>
       )}
+
+      {tab === "registration" && <RegistrationArea />}
 
       {tab === "bodyshell" && (
         <BodyshellArea />
