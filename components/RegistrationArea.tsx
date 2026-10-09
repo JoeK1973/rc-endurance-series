@@ -13,8 +13,10 @@ export default function RegistrationArea() {
   const [busy, setBusy] = useState("");
   const [message, setMessage] = useState("");
   const token = useCallback(async () => {
+    // Wait for Firebase to restore its persisted user after returning from PayPal.
+    await auth.authStateReady();
     const user = auth.currentUser;
-    if (!user) throw new Error("Please sign in again.");
+    if (!user) throw new Error("Your session is no longer signed in. Please sign in again, then use Complete payment to resume.");
     return user.getIdToken();
   }, []);
   const load = useCallback(async () => {
