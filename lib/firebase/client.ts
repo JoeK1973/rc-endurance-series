@@ -421,6 +421,10 @@ function client() {
   return {
     auth: {
       async getUser() {
+        // A full-page redirect (such as returning from PayPal) can happen
+        // before Firebase has restored its persisted browser session. Wait
+        // for Firebase's initial auth state before reporting the user as null.
+        await auth.authStateReady();
         return { data: { user: userRecord(auth.currentUser) }, error: null };
       },
       async signInWithPassword({ email, password }: { email: string; password: string }) {
