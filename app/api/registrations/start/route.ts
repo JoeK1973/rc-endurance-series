@@ -97,16 +97,19 @@ export async function POST(request: Request) {
       }
       const expiry = new Date(now.getTime() + RESERVATION_MS);
       tx.set(capacityRef, { revision: Number(capacitySnap.data()?.revision || 0) + 1, updated_at: FieldValue.serverTimestamp() });
+      // Replace the document rather than merging. A registration may be re-entering
+      // after an expired reservation or a waiting-list offer; merge:true would leave
+      // stale PayPal order IDs, offer expiry fields, or waiting-list positions behind.
+      // A new payment attempt always receives a fresh PayPal order below.
       tx.set(regRef, {
         id: regId, team_id: team.id, team_name: team.data().name || "Team", manager_id: user.uid,
         round_id: roundId, round_name: round.name || "Round", series_year: Number(round.series_year) || eventDate.getFullYear(),
         status: "payment_pending", payment_status: "pending", amount: 100, currency: "GBP",
         payment_pending_at: FieldValue.serverTimestamp(), payment_reservation_expires_at: Timestamp.fromDate(expiry),
         created_at: current?.created_at || FieldValue.serverTimestamp(), updated_at: FieldValue.serverTimestamp(),
-        ...(current?.paypal_order_id ? { paypal_order_id: current.paypal_order_id } : {}),
         ...(hasValidOffer ? { offered_place_accepted_at: FieldValue.serverTimestamp() } : {}),
-      }, { merge: true });
-      return { kind: "pay", registrationId: regId, orderId: current?.paypal_order_id || null };
+      });
+      return { kind: "pay", registrationId: regId, orderId: null };
     });
 
     if (result.kind === "waiting") return Response.json({ status: "waiting_list", registrationId: result.registrationId, position: result.position });
