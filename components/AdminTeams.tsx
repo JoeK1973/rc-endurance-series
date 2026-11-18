@@ -19,6 +19,16 @@ export default function AdminTeams() {
   async function load() {
     setLoading(true);
     setError("");
+    // This component can mount before Firebase has restored the persisted
+    // session. Wait for Auth initialisation before issuing Firestore reads;
+    // otherwise the compatibility client returns "Not authenticated" and
+    // the page incorrectly displays an empty team list.
+    await auth.authStateReady();
+    if (!auth.currentUser) {
+      setError("Please sign in again to view approved teams.");
+      setLoading(false);
+      return;
+    }
     const client = createClient();
     const [{ data: teamRows, error: teamError }, { data: profileRows, error: profileError }] = await Promise.all([
       client.from("teams").select("*").order("name"),
