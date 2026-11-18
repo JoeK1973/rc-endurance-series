@@ -174,13 +174,22 @@ textarea {
    LAYOUT
 ======================================== */
 
-.wrap,
-.main {
+.wrap {
   max-width: 1450px;
   margin: auto;
 }
 
+.siteLayout {
+  display: flex;
+  min-height: 100vh;
+  align-items: stretch;
+}
+
 .main {
+  flex: 1;
+  min-width: 0;
+  max-width: none;
+  margin: 0;
   padding: 26px 28px 55px;
 }
 
@@ -234,12 +243,15 @@ label {
 ======================================== */
 
 .siteHeader {
-  width: 100%;
+  width: 250px;
+  min-width: 250px;
+  min-height: 100vh;
+  align-self: stretch;
 
   background: var(--header);
   color: var(--text);
 
-  border-bottom: 1px solid var(--header-border);
+  border-right: 1px solid var(--header-border);
 
   transition:
     background 0.2s ease,
@@ -247,12 +259,16 @@ label {
 }
 
 .head {
-  min-height: 70px;
-  padding: 0 28px;
+  width: 100%;
+  max-width: none;
+  min-height: 100vh;
+  margin: 0;
+  padding: 24px 16px;
 
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
 
   gap: 30px;
 }
@@ -271,7 +287,8 @@ label {
 }
 
 .logoImage {
-  width: 230px;
+  width: 100%;
+  max-width: 218px;
   height: auto;
   display: block;
 }
@@ -303,24 +320,24 @@ label {
 
 .navArea {
   display: flex;
-  align-items: center;
-
+  flex-direction: column;
+  align-items: stretch;
   gap: 20px;
-
-  margin-left: auto;
 }
 
 .navs {
   display: flex;
-  align-items: center;
-  justify-content: flex-end;
-
-  gap: 10px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 6px;
+  width: 100%;
 }
 
 .nav {
-  padding: 10px 13px;
+  display: block;
+  width: 100%;
+  padding: 12px 14px;
 
   text-decoration: none;
 
@@ -348,6 +365,9 @@ label {
 /* Navigation buttons */
 
 .head .linkButton {
+  display: block;
+  width: 100%;
+  text-align: left;
   border: 0;
 
   background: transparent;
@@ -358,9 +378,10 @@ label {
   font: inherit;
   font-weight: 650;
 
-  padding: 10px 13px;
+  padding: 12px 14px;
 
   border-radius: 7px;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
 .head .linkButton:hover {
@@ -376,9 +397,11 @@ label {
 .navActions {
   display: flex;
   align-items: center;
-
+  justify-content: flex-start;
   gap: 10px;
-  margin-left: 4px;
+  margin: 8px 0 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
 }
 
 
@@ -1328,12 +1351,17 @@ textarea:focus {
 ======================================== */
 
 @media (max-width: 900px) {
-  .head {
-    gap: 20px;
+  .siteHeader {
+    width: 220px;
+    min-width: 220px;
   }
 
-  .logoImage {
-    width: 190px;
+  .head {
+    padding: 20px 13px;
+  }
+
+  .main {
+    padding: 24px 20px 45px;
   }
 }
 
@@ -1342,33 +1370,58 @@ textarea:focus {
    RESPONSIVE - MOBILE
 ======================================== */
 
-@media (max-width: 800px) {
+@media (max-width: 700px) {
+  .siteLayout {
+    display: block;
+  }
+
+  .siteHeader {
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    border-right: 0;
+    border-bottom: 1px solid var(--header-border);
+  }
+
   .head {
-    padding: 12px 18px;
+    min-height: 0;
+    padding: 14px 16px;
+    gap: 14px;
+  }
 
-    align-items: flex-start;
-    flex-direction: column;
-
-    gap: 10px;
+  .logoImage {
+    width: 220px;
   }
 
   .navArea {
     width: 100%;
-
-    margin-left: 0;
-
-    justify-content: space-between;
-    flex-wrap: wrap;
-
     gap: 10px;
   }
 
   .navs {
-    justify-content: flex-start;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .nav {
+    width: auto;
+    padding: 9px 11px;
+  }
+
+  .head .linkButton {
+    width: auto;
+    padding: 9px 11px;
+  }
+
+  .navActions {
+    margin: 0;
+    padding-top: 10px;
   }
 
   .main {
-    padding: 22px 16px;
+    padding: 22px 16px 40px;
   }
 
   .two {
@@ -1389,18 +1442,6 @@ textarea:focus {
 
   .messageBubble {
     max-width: 90%;
-  }
-}
-
-
-@media (max-width: 700px) {
-  .logoImage {
-    width: 220px;
-  }
-
-  .navs {
-    width: 100%;
-    flex-wrap: wrap;
   }
 }
 
@@ -1439,13 +1480,6 @@ textarea:focus {
     font-size: 0.92rem;
   }
 
-  .nav {
-    padding: 8px;
-  }
-
-  .logoImage {
-    width: 190px;
-  }
 }
 
 
