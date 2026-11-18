@@ -89,13 +89,13 @@ export default function AuthNav() {
 
       {isTeamManager && (
         <Link className="nav" href="/teams">
-          Team Area
+          Teams Area
         </Link>
       )}
 
       {isAdmin && (
         <Link className="nav" href="/admin">
-          Admin
+          Admin Area
         </Link>
       )}
 

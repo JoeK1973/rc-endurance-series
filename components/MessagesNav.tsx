@@ -140,15 +140,15 @@ export default function MessagesNav() {
       href="/messages"
       aria-label={
         unreadCount > 0
-          ? `Messages - ${unreadCount} unread`
-          : "Messages"
+          ? `Inbox - ${unreadCount} unread`
+          : "Inbox"
       }
       title={
         unreadCount > 0
           ? `${unreadCount} unread message${
               unreadCount === 1 ? "" : "s"
             }`
-          : "Messages"
+          : "Inbox"
       }
     >
       <svg

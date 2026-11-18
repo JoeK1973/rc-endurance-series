@@ -62,6 +62,7 @@ export default function TeamsArea({
   const [teamId, setTeamId] = useState<string | null>(null);
   const [teamName, setTeamName] = useState("");
   const [teamClub, setTeamClub] = useState("");
+  const [lookingForDrivers, setLookingForDrivers] = useState(false);
 
   const [rounds, setRounds] = useState<Round[]>([]);
   const [roundId, setRoundId] = useState("");
@@ -102,7 +103,7 @@ export default function TeamsArea({
     ] = await Promise.all([
       supabase
         .from("teams")
-        .select("id,name,club")
+        .select("id,name,club,looking_for_drivers")
         .eq("manager_id", user.id)
         .maybeSingle(),
 
@@ -148,6 +149,7 @@ export default function TeamsArea({
       setTeamId(teamData.id);
       setTeamName(teamData.name || "");
       setTeamClub(teamData.club || "");
+      setLookingForDrivers(teamData.looking_for_drivers === true);
 
       const { data: requestsData } = await supabase
         .from("team_driver_requests")
@@ -271,6 +273,7 @@ if (shortlistData) {
         .update({
           name: teamName,
           club: teamClub || null,
+          looking_for_drivers: lookingForDrivers,
         })
         .eq("id", teamId);
 
@@ -281,6 +284,7 @@ if (shortlistData) {
         .insert({
           name: teamName,
           club: teamClub || null,
+          looking_for_drivers: lookingForDrivers,
           manager_id: userId,
         })
         .select("id")
@@ -780,6 +784,16 @@ if (shortlistData) {
                 placeholder="Optional club name"
               />
             </label>
+
+            <label className="checkboxLabel space">
+              <input
+                type="checkbox"
+                checked={lookingForDrivers}
+                onChange={(e) => setLookingForDrivers(e.target.checked)}
+              />
+              <span>We're looking for drivers</span>
+            </label>
+            <p className="muted">When enabled, your team will appear in Find a Team so drivers can contact you.</p>
 
             <button
               className="btn space"

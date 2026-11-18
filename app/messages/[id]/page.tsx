@@ -345,7 +345,7 @@ if (unreadIds.length > 0) {
   if (loading) {
     return (
       <>
-        <h1>Messages</h1>
+        <h1>Inbox</h1>
 
         <div className="card">
           Loading conversation...
@@ -357,7 +357,7 @@ if (unreadIds.length > 0) {
   if (error) {
     return (
       <>
-        <h1>Messages</h1>
+        <h1>Inbox</h1>
 
         <div className="notice">
           {error}
@@ -367,7 +367,7 @@ if (unreadIds.length > 0) {
           className="btn space"
           href="/messages"
         >
-          Back to messages
+          Back to Inbox
         </Link>
       </>
     );
@@ -379,7 +379,7 @@ if (unreadIds.length > 0) {
         className="muted"
         href="/messages"
       >
-        ← Back to messages
+        ← Back to Inbox
       </Link>
 
       <div className="messageHeader">

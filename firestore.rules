@@ -145,7 +145,7 @@ match /profiles/{userId} {
         (
           signedIn()
           && resource.data.manager_id == request.auth.uid
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["name", "club"])
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["name", "club", "looking_for_drivers"])
         )
         ||
         (

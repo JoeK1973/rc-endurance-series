@@ -1497,3 +1497,20 @@ textarea:focus {
   .registrationAdminRow { flex-direction: column; }
   .registrationAdminActions { justify-content: flex-start; }
 }
+
+/* Role-based home page cards and team recruitment preference */
+.homeOptionCard {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  transition: background-color 140ms ease, border-color 140ms ease, transform 140ms ease;
+}
+.homeOptionCard:hover {
+  background: var(--surface-hover);
+  border-color: var(--nav-hover-bg);
+  transform: translateY(-1px);
+}
+.homeOptionCard h2 { margin-top: 0; }
+.homeOptionAction { display: inline-block; margin-top: 0.5rem; color: var(--blue); font-weight: 600; }
+.checkboxLabel { display: flex; align-items: center; gap: 0.65rem; }
+.checkboxLabel input { width: 1.05rem; height: 1.05rem; }

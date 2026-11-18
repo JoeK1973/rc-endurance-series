@@ -361,7 +361,7 @@ const messageRows = messageResults.flatMap(
   if (loading) {
     return (
       <>
-        <h1>Messages</h1>
+        <h1>Inbox</h1>
 
         <div className="card">
           Loading conversations...
@@ -373,7 +373,7 @@ const messageRows = messageResults.flatMap(
   if (error) {
     return (
       <>
-        <h1>Messages</h1>
+        <h1>Inbox</h1>
 
         <div className="notice">
           {error}
@@ -391,7 +391,7 @@ const messageRows = messageResults.flatMap(
 
   return (
     <div>
-      <h1>Messages</h1>
+      <h1>Inbox</h1>
 
       <p className="muted">
         Your conversations with teams and drivers.
