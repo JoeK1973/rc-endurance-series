@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import AdminTabs from "@/components/AdminTabs";
 import AdminGuard from "@/components/AdminGuard";
-import { createClient } from "@/lib/firebase/client";
+import { auth, createClient } from "@/lib/firebase/client";
 
 type Profile = { id: string; name?: string | null; email?: string | null; role?: string | null };
 
@@ -46,10 +46,28 @@ export default function ManageAdminsPage() {
       setMessage("The superuser account cannot remove its own superuser permission.");
       return;
     }
-    const s = createClient();
-    const { error } = await s.from("profiles").update({ role }).eq("id", profile.id);
-    setMessage(error ? error.message : `${profile.email || profile.name || "User"} is now ${role}.`);
-    await load();
+    const user = auth.currentUser;
+    if (!user) {
+      setMessage("Please sign in again and retry.");
+      return;
+    }
+    try {
+      const token = await user.getIdToken();
+      const response = await fetch("/api/admin/users/role", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ userId: profile.id, role }),
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        setMessage(result.error || "Could not update administrator permissions.");
+        return;
+      }
+      setMessage(`${profile.email || profile.name || "User"} is now ${role}.`);
+      await load();
+    } catch (error: any) {
+      setMessage(error?.message || "Could not update administrator permissions.");
+    }
   }
 
   async function promoteByEmail(e: React.FormEvent) {
