@@ -11,19 +11,19 @@
   --navy: #0b1626;
   --navy2: #13233a;
 
-  --red: #ef3d43;
-  --blue: #2f67c7;
-  --green: #27854d;
-  --amber: #c97800;
+  --red: #c96b70;
+  --blue: #587eaf;
+  --green: #5b876a;
+  --amber: #b58a4b;
 
-  --bg: #eef2f7;
-  --bg-gradient-start: #eef2f7;
-  --bg-gradient-middle: #f8fafc;
-  --bg-gradient-end: #edf1f6;
+  --bg: #e9edf2;
+  --bg-gradient-start: #e9edf2;
+  --bg-gradient-middle: #f1f3f6;
+  --bg-gradient-end: #e7ebf0;
 
   --surface: #ffffff;
-  --surface-alt: #f4f6f9;
-  --surface-hover: #e9eef5;
+  --surface-alt: #f0f2f5;
+  --surface-hover: #e4e9ef;
 
   --text: #17202b;
   --text-strong: #101820;
@@ -39,13 +39,13 @@
   --nav-text: #344255;
   --nav-hover-bg: #e8edf4;
   --nav-hover-text: #17202b;
-  --nav-active-bg: #dce7f7;
-  --nav-active-text: #234b85;
+  --nav-active-bg: #e0e7f0;
+  --nav-active-text: #3f5f86;
 
   --input-bg: #ffffff;
   --input-text: #17202b;
   --input-border: #bfc9d6;
-  --input-focus: #3265bd;
+  --input-focus: #6686ad;
 
   --card-shadow: 0 4px 16px rgba(29, 44, 66, 0.06);
 
@@ -53,7 +53,7 @@
   --tab-text: #405066;
   --tab-hover-bg: #dce5ef;
   --tab-active-bg: #ffffff;
-  --tab-active-text: #234b85;
+  --tab-active-text: #3f5f86;
 
   --message-mine: #dbeafe;
   --message-theirs: #eef2f7;
@@ -530,7 +530,7 @@ label {
   align-items: center;
   justify-content: center;
 
-  background: #dc2626;
+  background: #bd666b;
   color: #ffffff;
 
   border-radius: 999px;
@@ -620,7 +620,7 @@ label {
 }
 
 .danger {
-  background: #b42c34;
+  background: #a9575d;
   border-color: #b42c34;
 
   color: #ffffff;
@@ -917,27 +917,27 @@ textarea:focus {
 ======================================== */
 
 .availability-have_team {
-  color: #2454a0;
-  border-color: #4d7ed4;
-  background: #f4f7ff;
+  color: #49698f;
+  border-color: #8da5c2;
+  background: #edf1f6;
 }
 
 .availability-available_to_drive {
-  color: #166534;
-  border-color: #45a66d;
-  background: #f3fbf6;
+  color: #477455;
+  border-color: #91b39a;
+  background: #edf4ef;
 }
 
 .availability-reserve {
-  color: #8a5300;
-  border-color: #d99020;
-  background: #fff8eb;
+  color: #80643a;
+  border-color: #c5a36d;
+  background: #f6f1e8;
 }
 
 .availability-unavailable {
-  color: #a61b1b;
-  border-color: #dc4b4b;
-  background: #fff2f2;
+  color: #99565a;
+  border-color: #c88b8e;
+  background: #f5eeee;
 }
 
 .availability-none {
@@ -987,23 +987,23 @@ textarea:focus {
 
 .status.available_to_drive,
 .status.looking_for_team {
-  background: #e8f7ed;
-  color: #166534;
+  background: #eaf1eb;
+  color: #477455;
 }
 
 .status.have_team {
-  background: #e9f0ff;
-  color: #2454a0;
+  background: #e9eef4;
+  color: #49698f;
 }
 
 .status.reserve {
-  background: #fff4db;
-  color: #8a5300;
+  background: #f3eee4;
+  color: #80643a;
 }
 
 .status.unavailable {
-  background: #ffe9e9;
-  color: #a61b1b;
+  background: #f3eaea;
+  color: #99565a;
 }
 
 .status.none {
@@ -1171,7 +1171,7 @@ textarea:focus {
 
   border-radius: 50%;
 
-  background: #2563eb;
+  background: #6686ad;
 
   display: inline-block;
 }
@@ -1285,13 +1285,13 @@ textarea:focus {
 }
 
 .bodyshellStatus.approved {
-  background: #e8f7ed;
-  color: #166534;
+  background: #eaf1eb;
+  color: #477455;
 }
 
 .bodyshellStatus.pending {
-  background: #fff4db;
-  color: #8a5300;
+  background: #f3eee4;
+  color: #80643a;
 }
 
 .bodyshellApproved {
