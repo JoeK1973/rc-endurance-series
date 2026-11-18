@@ -627,48 +627,6 @@ setNotice(
             </div>
           </div>
 
-          <div className="card space">
-            <h2>Quick actions</h2>
-
-            <div className="actionRow">
-              <button
-                className="btn"
-                onClick={() => setTab("profile")}
-              >
-                Edit my profile
-              </button>
-
-              <button
-                className="btn"
-                onClick={() =>
-                  setTab("availability")
-                }
-              >
-                Set availability
-              </button>
-
-              <button
-                className="btn"
-                onClick={() =>
-                  setTab("invitations")
-                }
-              >
-                Team invitations
-                {invitations.length > 0
-                  ? ` (${invitations.length})`
-                  : ""}
-              </button>
-
-              <button
-                className="btn"
-                onClick={() =>
-                  setTab("requests")
-                }
-              >
-                View contact requests
-              </button>
-            </div>
-          </div>
 
           <div className="card space">
             <h2>Upcoming rounds</h2>
