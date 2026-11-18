@@ -352,14 +352,18 @@ if (idFilter && !or) {
         snap.docs.forEach((d) => results.set(d.id, { ref: d.ref, data: d.data() }));
       }
 
-      if (auth.currentUser) {
+      // Team-manager conversations must be queried by team_id, not by a
+      // copied manager_id field on the conversation. Firestore rules verify
+      // ownership against the actual teams/{teamId} document, so querying
+      // manager_id here can be rejected even for a legitimate driver session.
+      // Drivers with no managed teams therefore make only the driver_id query.
+      if (or.teamIds.length > 0) {
+        const teamIds = or.teamIds.slice(0, 30);
         const snap = await getDocs(
-          query(base, where("manager_id", "==", auth.currentUser.uid))
+          query(base, where("team_id", "in", teamIds))
         );
         snap.docs.forEach((d) => {
-          if (!or.teamIds.length || or.teamIds.includes(String(d.data().team_id))) {
-            results.set(d.id, { ref: d.ref, data: d.data() });
-          }
+          results.set(d.id, { ref: d.ref, data: d.data() });
         });
       }
 
