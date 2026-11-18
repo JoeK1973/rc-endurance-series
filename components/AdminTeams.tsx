@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClient } from "@/lib/firebase/client";
+import { auth, createClient } from "@/lib/firebase/client";
 
 type Team = { id: string; name: string; manager_id: string; club?: string | null; created_at?: string };
 type Profile = { id: string; name?: string | null; email?: string | null; role?: string };
@@ -44,9 +44,12 @@ export default function AdminTeams() {
     setNotice("");
     try {
       const client = createClient();
-      const { data: { user } } = await client.auth.getUser();
-      if (!user) throw new Error("Please sign in again.");
-      const token = await user.getIdToken();
+      // The compatibility client's getUser() returns a profile-shaped record,
+      // not the Firebase User object. Get the ID token from Firebase Auth itself.
+      await auth.authStateReady();
+      const firebaseUser = auth.currentUser;
+      if (!firebaseUser) throw new Error("Please sign in again.");
+      const token = await firebaseUser.getIdToken();
       const response = await fetch("/api/admin/teams", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
