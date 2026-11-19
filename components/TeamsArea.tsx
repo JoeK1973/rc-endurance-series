@@ -5,6 +5,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/firebase/client";
 import BodyshellArea from "@/components/BodyshellArea";
 import RegistrationArea from "@/components/RegistrationArea";
+import AppIcon from "@/components/AppIcon";
 
 type Tab = "dashboard" | "find" | "team" | "shortlist" | "bodyshell" | "registration";
 
@@ -610,17 +611,36 @@ if (shortlistData) {
     );
   };
 
-  return (
-    <div>
-      <h1>Teams</h1>
+  const teamPageTitles: Record<Tab, string> = {
+    dashboard: "Team Dashboard",
+    find: "Find a Driver",
+    team: "My Team",
+    shortlist: "My Shortlist",
+    bodyshell: "Submit Bodyshell",
+    registration: "Round Registration",
+  };
 
-      <div className="driverTabs">
+  const teamActions: { id: Tab; title: string; description: string; icon: "users" | "flag" | "clipboard" | "car" | "trophy" }[] = [
+    { id: "find", title: "Find a Driver", description: "Search driver profiles and check availability for each championship round.", icon: "users" },
+    { id: "team", title: "My Team", description: "Manage your team details, driver line-up and invitations.", icon: "flag" },
+    { id: "registration", title: "Round Registration", description: "Register your team and manage entries for championship rounds.", icon: "clipboard" },
+    { id: "bodyshell", title: "Submit Bodyshell", description: "Submit your team bodyshell for approval.", icon: "car" },
+    { id: "shortlist", title: "My Shortlist", description: "Keep track of drivers you may want to invite to your team.", icon: "trophy" },
+  ];
+
+  return (
+    <div className="driverAreaPage teamsAreaPage">
+      <div className="pageHeading">
+        <div className="eyebrow">RC ENDURANCE SERIES / TEAM PORTAL</div>
+        <h1>{teamPageTitles[tab]}</h1>
+        <p className="muted">{tab === "dashboard" ? "Manage your team, find drivers and organise your championship entries." : "Manage your team and championship activity."}</p>
+      </div>
+
+      {tab !== "dashboard" && <div className="driverTabs">
         {tabs.map(([id, label]) => (
           <button
             key={id}
-            className={`driverTab ${
-              tab === id ? "active" : ""
-            }`}
+            className={`driverTab ${tab === id ? "active" : ""}`}
             onClick={() => {
               setTab(id);
               setMessage("");
@@ -629,7 +649,7 @@ if (shortlistData) {
             {label}
           </button>
         ))}
-      </div>
+      </div>}
 
       {message && (
         <div className="notice space">
@@ -638,40 +658,27 @@ if (shortlistData) {
       )}
 
       {tab === "dashboard" && (
-        <div className="grid two space">
-          <div className="card teamDashboardCard">
-            <h2>Find a Driver</h2>
-
-            <p className="muted">
-              Search live driver availability by
-              championship round and find drivers
-              available to drive or act as a reserve.
-            </p>
-
-            <button
-              className="btn"
-              onClick={() => setTab("find")}
-            >
-              Search drivers
-            </button>
-          </div>
-
-          <div className="card teamDashboardCard">
-            <h2>My Team</h2>
-
-            <p className="muted">
-              Create your endurance racing team and
-              manage your driver lineup for every
-              championship round.
-            </p>
-
-            <button
-              className="btn"
-              onClick={() => setTab("team")}
-            >
-              Manage team
-            </button>
-          </div>
+        <div className="driverDashboard space">
+          <section className="driverActionsSection">
+            <div className="driverSectionHeading">
+              <h2>Your team tools</h2>
+              <p className="muted">Choose an area to manage your team and racing activity.</p>
+            </div>
+            <div className="driverActionGrid">
+              {teamActions.map((action) => (
+                <button
+                  type="button"
+                  className="card driverActionCard"
+                  key={action.id}
+                  onClick={() => { setTab(action.id); setMessage(""); }}
+                >
+                  <span className="driverActionIcon"><AppIcon name={action.icon} size={22} /></span>
+                  <span className="driverActionCopy"><strong>{action.title}</strong><small>{action.description}</small></span>
+                  <AppIcon name="chevron-right" size={18} />
+                </button>
+              ))}
+            </div>
+          </section>
         </div>
       )}
 
