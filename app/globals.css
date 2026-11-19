@@ -864,6 +864,26 @@ textarea:focus {
   flex-wrap: wrap;
 }
 
+.registrationRoundCard {
+  padding: 10px 16px;
+}
+
+.registrationRoundCard p {
+  margin: 6px 0;
+}
+
+.registrationRoundCard .btn {
+  margin-top: 4px;
+}
+
+.roundRow h3 {
+  margin: 0;
+}
+
+.registrationRoundCard .roundRow {
+  padding: 4px 0 8px;
+}
+
 .roundRow {
   display: flex;
   justify-content: space-between;

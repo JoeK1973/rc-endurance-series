@@ -81,8 +81,8 @@ export default function RegistrationArea() {
       const hasOffer = registration?.status === "payment_offer" && (!registration.offer_expires_at || new Date(registration.offer_expires_at).getTime() > Date.now());
       const expiredOffer = registration?.status === "payment_offer" && !hasOffer;
       const canStart = !paid && !pending && !hasOffer && registration?.status !== "waiting_list" && registration?.status !== "cancelled" && !closed;
-      return <div className="card" key={round.id}>
-        <div className="roundRow"><div><h3>{round.series_year || eventDate.getFullYear()} — {round.name}</h3><div className="muted">{round.event_date}{round.venue ? ` · ${round.venue}` : ""}</div><div className="muted">Registration closes {closeDate.toLocaleDateString("en-GB")}{round.registration_open === false ? " · Closed by organiser" : ""}</div></div><strong>£100.00</strong></div>
+      return <div className="card registrationRoundCard" key={round.id}>
+        <div className="roundRow"><h3>{round.series_year || eventDate.getFullYear()} — {round.name}</h3><strong>£100.00</strong></div>
         {registration && <p><b>Status:</b> {statusLabel(registration)}{registration.refund_status === "refunded_manually" ? " · Refund recorded" : ""}</p>}
         {paid && <p className="muted">Your entry is confirmed. You can continue to manage your driver lineup separately.</p>}
         {pending && <p className="muted">Your place is temporarily reserved until {registration?.payment_reservation_expires_at ? new Date(registration.payment_reservation_expires_at).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : "the reservation expires"}. Select Complete payment to continue.</p>}
