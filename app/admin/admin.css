@@ -221,3 +221,10 @@
     padding: 17px;
   }
 }
+
+.tableScroll { width: 100%; overflow-x: auto; }
+.dataTable { width: 100%; border-collapse: collapse; min-width: 520px; }
+.dataTable th, .dataTable td { padding: 11px 13px; border-bottom: 1px solid var(--line); text-align: center; }
+.dataTable thead th { color: var(--muted); font-size: .86rem; font-weight: 700; }
+.dataTable tbody th { text-align: left; font-weight: 700; }
+.dataTable tbody td { font-variant-numeric: tabular-nums; }

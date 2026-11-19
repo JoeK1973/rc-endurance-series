@@ -5,10 +5,11 @@ export async function GET(request: Request) {
   try {
     await requireAdmin(request);
     const db = adminDb();
-    const [regs, rounds] = await Promise.all([db.collection("round_registrations").get(), db.collection("rounds").get()]);
+    const [regs, rounds, classes, teams] = await Promise.all([db.collection("round_registrations").get(), db.collection("rounds").get(), db.collection("classes").get(), db.collection("teams").get()]);
+    const teamMap = new Map(teams.docs.map((d) => [d.id, d.data()]));
     const roundMap = new Map(rounds.docs.map((d) => [d.id, { id: d.id, ...d.data() }]));
-    const registrations = regs.docs.map((d) => ({ id: d.id, ...d.data(), created_at: d.data().created_at?.toDate?.().toISOString() || null, paid_at: d.data().paid_at?.toDate?.().toISOString() || null, round: roundMap.get(d.data().round_id) || null }));
-    return Response.json({ registrations, rounds: rounds.docs.map((d) => ({ id: d.id, ...d.data() })) });
+    const registrations = regs.docs.map((d) => ({ id: d.id, ...d.data(), class_id: d.data().class_id || teamMap.get(d.data().team_id)?.class_id || "", class_name: d.data().class_name || teamMap.get(d.data().team_id)?.class_name || "", created_at: d.data().created_at?.toDate?.().toISOString() || null, paid_at: d.data().paid_at?.toDate?.().toISOString() || null, round: roundMap.get(d.data().round_id) || null }));
+    return Response.json({ registrations, rounds: rounds.docs.map((d) => ({ id: d.id, ...d.data() })), classes: classes.docs.map((d) => ({ id: d.id, ...d.data() })).sort((a: any, b: any) => String(a.name || "").localeCompare(String(b.name || ""))) });
   } catch (error: any) {
     return Response.json({ error: error?.message === "UNAUTHENTICATED" ? "Please sign in." : "Admin access required." }, { status: error?.message === "UNAUTHENTICATED" ? 401 : 403 });
   }

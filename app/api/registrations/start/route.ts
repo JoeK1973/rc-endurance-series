@@ -14,6 +14,9 @@ export async function POST(request: Request) {
     const teamSnap = await db.collection("teams").where("manager_id", "==", user.uid).limit(1).get();
     if (teamSnap.empty) return Response.json({ error: "You need a registered team before entering a round." }, { status: 400 });
     const team = teamSnap.docs[0];
+    const teamClassId = String(team.data().class_id || "");
+    const teamClassName = String(team.data().class_name || "");
+    if (!teamClassId || !teamClassName) throw new Error("TEAM_CLASS_REQUIRED");
     const roundRef = db.collection("rounds").doc(roundId);
     const regId = `${roundId}__${team.id}`;
     const regRef = db.collection("round_registrations").doc(regId);
@@ -89,7 +92,7 @@ export async function POST(request: Request) {
         const position = waiters.reduce((max, d) => Math.max(max, Number(d.data().waiting_list_position) || 0), 0) + 1;
         tx.set(regRef, {
           id: regId, team_id: team.id, team_name: team.data().name || "Team", manager_id: user.uid,
-          round_id: roundId, round_name: round.name || "Round", series_year: Number(round.series_year) || (eventDate.getFullYear()),
+          round_id: roundId, round_name: round.name || "Round", class_id: teamClassId, class_name: teamClassName, series_year: Number(round.series_year) || (eventDate.getFullYear()),
           status: "waiting_list", payment_status: "not_started", waiting_list_position: position,
           amount: 100, currency: "GBP", created_at: FieldValue.serverTimestamp(), updated_at: FieldValue.serverTimestamp(),
         });
@@ -103,7 +106,7 @@ export async function POST(request: Request) {
       // A new payment attempt always receives a fresh PayPal order below.
       tx.set(regRef, {
         id: regId, team_id: team.id, team_name: team.data().name || "Team", manager_id: user.uid,
-        round_id: roundId, round_name: round.name || "Round", series_year: Number(round.series_year) || eventDate.getFullYear(),
+        round_id: roundId, round_name: round.name || "Round", class_id: teamClassId, class_name: teamClassName, series_year: Number(round.series_year) || eventDate.getFullYear(),
         status: "payment_pending", payment_status: "pending", amount: 100, currency: "GBP",
         payment_pending_at: FieldValue.serverTimestamp(), payment_reservation_expires_at: Timestamp.fromDate(expiry),
         created_at: current?.created_at || FieldValue.serverTimestamp(), updated_at: FieldValue.serverTimestamp(),
@@ -144,7 +147,7 @@ export async function POST(request: Request) {
     const map: Record<string, string> = {
       UNAUTHENTICATED: "Please sign in again.", FORBIDDEN: "You do not have permission.", ROUND_NOT_FOUND: "Round not found.",
       REGISTRATION_CLOSED_MANUALLY: "Registration for this round is currently closed.", REGISTRATION_CLOSED: "Registration has closed for this round.",
-      ROUND_DATE_MISSING: "This round does not have a valid event date.", ALREADY_REGISTERED: "Your team is already registered and paid for this round.",
+      ROUND_DATE_MISSING: "This round does not have a valid event date.", ALREADY_REGISTERED: "Your team is already registered and paid for this round.", TEAM_CLASS_REQUIRED: "Please select a team class in My Team before registering for a round.",
     };
     return Response.json({ error: map[message] || message }, { status: message === "UNAUTHENTICATED" ? 401 : 400 });
   }

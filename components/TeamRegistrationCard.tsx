@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 import { onAuthStateChanged, type User } from "firebase/auth";
 import { auth } from "@/lib/firebase/client";
 
+type RacingClass = { id: string; name: string };
 type Application = {
+  class_name?: string;
   id: string;
   team_name: string;
   club?: string;
@@ -23,6 +25,8 @@ export default function TeamRegistrationCard() {
   const [teamName, setTeamName] = useState("");
   const [club, setClub] = useState("");
   const [reason, setReason] = useState("");
+  const [classes, setClasses] = useState<RacingClass[]>([]);
+  const [classId, setClassId] = useState("");
 
   async function loadForUser(firebaseUser: User | null) {
     setUser(firebaseUser);
@@ -44,6 +48,8 @@ export default function TeamRegistrationCard() {
       if (!response.ok) throw new Error(result.error || "Could not load your team application.");
       setRole(result.role || "driver");
       setApplication(result.application || null);
+      setClasses(result.classes || []);
+      setClassId((current) => current || result.classes?.[0]?.id || "");
       setMessage("");
     } catch (error: any) {
       setMessage(error?.message || "Could not load your team application.");
@@ -78,6 +84,7 @@ export default function TeamRegistrationCard() {
           teamName: teamName.trim(),
           club: club.trim(),
           reason: reason.trim(),
+          classId,
         }),
       });
       const result = await response.json();
@@ -124,6 +131,7 @@ export default function TeamRegistrationCard() {
       <div className="card">
         <h2>Team Registration</h2>
         <p>Your application for <b>{application.team_name}</b> is awaiting admin approval.</p>
+        {application.class_name && <p>Class: <b>{application.class_name}</b></p>}
         {application.club && <p className="muted">Club: {application.club}</p>}
         {message && <p className="notice">{message}</p>}
       </div>
@@ -135,6 +143,7 @@ export default function TeamRegistrationCard() {
       <div className="card">
         <h2>Team Registration Approved</h2>
         <p>Your application for <b>{application.team_name}</b> has been approved.</p>
+        {application.class_name && <p>Class: <b>{application.class_name}</b></p>}
         <a className="btn" href="/teams">Open Team Area</a>
       </div>
     );
@@ -151,11 +160,20 @@ export default function TeamRegistrationCard() {
         </p>
       )}
       <p className="muted">Apply to register a team in the RC Endurance Series. An admin will review your application.</p>
+      {!classes.length && <p className="notice">No team classes are available yet. Please contact the organiser.</p>}
 
       <form onSubmit={submitApplication} className="space">
         <label>
           Team name
           <input className="input" required maxLength={80} value={teamName} onChange={(e) => setTeamName(e.target.value)} />
+        </label>
+
+        <label>
+          Racing class
+          <select className="input" required value={classId} onChange={(e) => setClassId(e.target.value)}>
+            <option value="">Select a class</option>
+            {classes.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
+          </select>
         </label>
 
         <label>
@@ -168,7 +186,7 @@ export default function TeamRegistrationCard() {
           <textarea className="input" rows={4} maxLength={2000} value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Tell the organiser about your team." />
         </label>
 
-        <button className="btn" disabled={saving}>
+        <button className="btn" disabled={saving || !classes.length || !classId}>
           {saving ? "Submitting..." : "Submit team application"}
         </button>
 

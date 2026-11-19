@@ -92,6 +92,8 @@ export async function PATCH(request: Request) {
         application_id: applicationId,
         manager_id: applicantId,
         name: application.team_name,
+        class_id: application.class_id || "",
+        class_name: application.class_name || "",
         club: application.club || "",
         looking_for_drivers: true,
         created_at: FieldValue.serverTimestamp(),

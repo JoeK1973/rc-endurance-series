@@ -7,7 +7,7 @@ export default function AdminRegistrationsPage() {
       <div className="pageHeading">
         <div className="eyebrow">ADMINISTRATION / OPERATIONS</div>
         <h1>Manage Registrations</h1>
-        <p className="muted">Manage team entries and payments.</p>
+        <p className="muted">Manage team entries, payments and the number of entries in each racing class per round.</p>
       </div>
       <AdminTabs />
       <AdminRegistrations />

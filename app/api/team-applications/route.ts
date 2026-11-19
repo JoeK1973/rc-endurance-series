@@ -21,9 +21,12 @@ export async function GET(request: Request) {
     const latest: any = applications[0] || null;
     if (latest?.created_at?.toDate) latest.created_at = latest.created_at.toDate().toISOString();
 
+    const classesSnap = await db.collection("classes").where("active", "==", true).get();
+    const classes = classesSnap.docs.map((doc) => ({ id: doc.id, name: doc.data().name })).sort((a, b) => a.name.localeCompare(b.name));
     return Response.json({
       role: profileSnap.data()?.role || "driver",
       application: latest,
+      classes,
     });
   } catch (error: any) {
     const unauthenticated = error?.message === "UNAUTHENTICATED";
@@ -41,12 +44,13 @@ export async function POST(request: Request) {
     const teamName = typeof body?.teamName === "string" ? body.teamName.trim() : "";
     const club = typeof body?.club === "string" ? body.club.trim() : "";
     const reason = typeof body?.reason === "string" ? body.reason.trim() : "";
+    const classId = typeof body?.classId === "string" ? body.classId.trim() : "";
 
     if (!teamName || teamName.length > 80) {
       return Response.json({ error: "Enter a team name of 1–80 characters." }, { status: 400 });
     }
-    if (club.length > 100 || reason.length > 2000) {
-      return Response.json({ error: "The club or team description is too long." }, { status: 400 });
+    if (club.length > 100 || reason.length > 2000 || !classId) {
+      return Response.json({ error: !classId ? "Choose a racing class." : "The club or team description is too long." }, { status: 400 });
     }
 
     const db = adminDb();
@@ -75,12 +79,16 @@ export async function POST(request: Request) {
       );
     }
 
+    const classSnap = await db.collection("classes").doc(classId).get();
+    if (!classSnap.exists || classSnap.data()?.active === false) return Response.json({ error: "Choose an available team class." }, { status: 400 });
     const applicationRef = db.collection("team_applications").doc();
     const application = {
       applicant_id: user.uid,
       applicant_name: profileSnap.data()?.name || "",
       applicant_email: user.email || profileSnap.data()?.email || "",
       team_name: teamName,
+      class_id: classId,
+      class_name: classSnap.data()?.name || "",
       club,
       reason,
       status: "pending",

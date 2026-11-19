@@ -9,6 +9,8 @@ import AppIcon from "@/components/AppIcon";
 
 type Tab = "dashboard" | "find" | "team" | "shortlist" | "bodyshell" | "registration";
 
+type RacingClass = { id: string; name: string; active?: boolean };
+
 type Round = {
   id: string;
   name: string;
@@ -63,6 +65,8 @@ export default function TeamsArea({
   const [teamId, setTeamId] = useState<string | null>(null);
   const [teamName, setTeamName] = useState("");
   const [teamClub, setTeamClub] = useState("");
+  const [teamClassId, setTeamClassId] = useState("");
+  const [classes, setClasses] = useState<RacingClass[]>([]);
   const [lookingForDrivers, setLookingForDrivers] = useState(false);
 
   const [rounds, setRounds] = useState<Round[]>([]);
@@ -101,10 +105,11 @@ export default function TeamsArea({
       { data: profilesData },
       { data: availabilityData },
       { data: teamDriversData },
+      { data: classesData },
     ] = await Promise.all([
       supabase
         .from("teams")
-        .select("id,name,club,looking_for_drivers")
+        .select("id,name,club,class_id,class_name,looking_for_drivers")
         .eq("manager_id", user.id)
         .maybeSingle(),
 
@@ -128,6 +133,8 @@ export default function TeamsArea({
       supabase
         .from("team_drivers")
         .select("driver_id,round_id"),
+
+      supabase.from("classes").select("id,name,active").eq("active", true).order("name"),
     ]);
 
     const loadedRounds = (roundsData || []) as Round[];
@@ -145,11 +152,14 @@ export default function TeamsArea({
     setDrivers((driversData || []) as Driver[]);
     setAvailability((availabilityData || []) as Availability[]);
     setTeamDrivers((teamDriversData || []) as TeamDriver[]);
+    const loadedClasses = (classesData || []) as RacingClass[];
+    setClasses(loadedClasses);
 
     if (teamData) {
       setTeamId(teamData.id);
       setTeamName(teamData.name || "");
       setTeamClub(teamData.club || "");
+      setTeamClassId(teamData.class_id || "");
       setLookingForDrivers(teamData.looking_for_drivers === true);
 
       const { data: requestsData } = await supabase
@@ -162,6 +172,7 @@ export default function TeamsArea({
       );
     } else {
       setTeamId(null);
+      setTeamClassId((current) => current || loadedClasses[0]?.id || "");
       setTeamRequests([]);
     }
 
@@ -259,6 +270,7 @@ if (shortlistData) {
     e.preventDefault();
 
     if (!userId) return;
+    if (!teamClassId) { setMessage("Please choose a team class."); return; }
 
     setSaving(true);
     setMessage("");
@@ -274,6 +286,8 @@ if (shortlistData) {
         .update({
           name: teamName,
           club: teamClub || null,
+          class_id: teamClassId,
+          class_name: classes.find((item) => item.id === teamClassId)?.name || "",
           looking_for_drivers: lookingForDrivers,
         })
         .eq("id", teamId);
@@ -285,6 +299,8 @@ if (shortlistData) {
         .insert({
           name: teamName,
           club: teamClub || null,
+          class_id: teamClassId,
+          class_name: classes.find((item) => item.id === teamClassId)?.name || "",
           looking_for_drivers: lookingForDrivers,
           manager_id: userId,
         })
@@ -780,6 +796,14 @@ if (shortlistData) {
             </label>
 
             <label>
+              Racing class
+              <select className="input" required value={teamClassId} onChange={(e) => setTeamClassId(e.target.value)}>
+                <option value="">Select a class</option>
+                {classes.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
+              </select>
+            </label>
+
+            <label>
               Club
 
               <input
@@ -804,7 +828,7 @@ if (shortlistData) {
 
             <button
               className="btn space"
-              disabled={saving}
+              disabled={saving || !classes.length || !teamClassId}
             >
               {saving
                 ? "Saving..."

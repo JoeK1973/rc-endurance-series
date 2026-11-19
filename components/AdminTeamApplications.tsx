@@ -9,6 +9,7 @@ type Application = {
   applicant_name?: string;
   applicant_email?: string;
   team_name: string;
+  class_name?: string;
   club?: string;
   reason?: string;
   status: string;
@@ -102,6 +103,7 @@ export default function AdminTeamApplications() {
             <div>
               <h3>{row.team_name}</h3>
               <p className="muted">Applicant: {row.applicant_name || "Name not supplied"}{row.applicant_email ? ` · ${row.applicant_email}` : ""}</p>
+              {row.class_name && <p className="muted">Class applied for: <b>{row.class_name}</b></p>}
               {row.club && <p className="muted">Club: {row.club}</p>}
               {row.created_at && <p className="muted">Submitted: {new Date(row.created_at).toLocaleString("en-GB")}</p>}
             </div>

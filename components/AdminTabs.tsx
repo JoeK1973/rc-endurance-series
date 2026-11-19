@@ -11,6 +11,7 @@ const groups = [
     icon: "calendar" as const,
     items: [
       { href: "/admin/rounds", label: "Rounds" },
+      { href: "/admin/classes", label: "Classes" },
       { href: "/admin/results", label: "Results" },
       { href: "/admin/regulations", label: "Regulations" },
     ],
