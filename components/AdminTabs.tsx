@@ -11,6 +11,7 @@ const tabs = [
   { href: "/admin/registrations", label: "Manage Registrations" },
   { href: "/admin/admins", label: "Manage Admins" },
   { href: "/admin/bodyshells", label: "Manage Bodyshells" },
+  { href: "/admin/regulations", label: "Manage Regulations" },
   { href: "/admin/settings", label: "Settings" },
 ];
 
