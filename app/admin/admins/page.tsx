@@ -83,51 +83,54 @@ export default function ManageAdminsPage() {
   return (
     <AdminGuard>
       <>
-      <h1>Admin</h1>
-      <p className="muted">Manage administrator permissions.</p>
-      <AdminTabs />
-
-      {!canManage && <div className="notice space">Only the superuser can create or manage administrators.</div>}
-
-      <div className="card space">
-        <h2>Administrators</h2>
-        {loading ? <p className="muted">Loading...</p> : admins.map((admin) => (
-          <div className="roundRow" key={admin.id}>
-            <div><b>{admin.name || "Unnamed user"}</b><br /><span className="muted">{admin.email || admin.id}</span></div>
-            <div className="actionRow">
-              <span>{admin.role}</span>
-              {canManage && admin.role === "admin" && <button className="btn danger small" onClick={() => void setRole(admin, "driver")}>Remove admin</button>}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {canManage && <>
-        <div className="card space">
-          <h2>Make a user an admin</h2>
-          <form className="actionRow" onSubmit={promoteByEmail}>
-            <input className="input" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Existing user's email" />
-            <button className="btn">Make admin</button>
-          </form>
+        <div className="pageHeading">
+          <div className="eyebrow">ADMINISTRATION / SYSTEM</div>
+          <h1>Manage Administrators</h1>
+          <p className="muted">Manage administrator permissions.</p>
         </div>
+        <AdminTabs />
 
-        <div className="card">
-          <h2>Registered users</h2>
-          <input className="input space" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search users" />
-          {filteredUsers.map((profile) => (
-            <div className="roundRow" key={profile.id}>
-              <div><b>{profile.name || "Unnamed user"}</b><br /><span className="muted">{profile.email || profile.id}</span></div>
+        {!canManage && <div className="notice space">Only the superuser can create or manage administrators.</div>}
+
+        <div className="card space">
+          <h2>Administrators</h2>
+          {loading ? <p className="muted">Loading...</p> : admins.map((admin) => (
+            <div className="roundRow" key={admin.id}>
+              <div><b>{admin.name || "Unnamed user"}</b><br /><span className="muted">{admin.email || admin.id}</span></div>
               <div className="actionRow">
-                <span>{profile.role || "driver"}</span>
-                {profile.role === "driver" && <button className="btn small" onClick={() => void setRole(profile, "admin")}>Make admin</button>}
-                {profile.role === "admin" && <button className="btn danger small" onClick={() => void setRole(profile, "driver")}>Remove admin</button>}
+                <span>{admin.role}</span>
+                {canManage && admin.role === "admin" && <button className="btn danger small" onClick={() => void setRole(admin, "driver")}>Remove admin</button>}
               </div>
             </div>
           ))}
         </div>
-      </>}
 
-      {message && <div className="notice space">{message}</div>}
+        {canManage && <>
+          <div className="card space">
+            <h2>Make a user an admin</h2>
+            <form className="actionRow" onSubmit={promoteByEmail}>
+              <input className="input" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Existing user's email" />
+              <button className="btn">Make admin</button>
+            </form>
+          </div>
+
+          <div className="card">
+            <h2>Registered users</h2>
+            <input className="input space" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search users" />
+            {filteredUsers.map((profile) => (
+              <div className="roundRow" key={profile.id}>
+                <div><b>{profile.name || "Unnamed user"}</b><br /><span className="muted">{profile.email || profile.id}</span></div>
+                <div className="actionRow">
+                  <span>{profile.role || "driver"}</span>
+                  {profile.role === "driver" && <button className="btn small" onClick={() => void setRole(profile, "admin")}>Make admin</button>}
+                  {profile.role === "admin" && <button className="btn danger small" onClick={() => void setRole(profile, "driver")}>Remove admin</button>}
+                </div>
+              </div>
+            ))}
+          </div>
+        </>}
+
+        {message && <div className="notice space">{message}</div>}
       </>
     </AdminGuard>
   );

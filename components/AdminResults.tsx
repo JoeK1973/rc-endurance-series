@@ -123,8 +123,11 @@ export default function ManageResultsPage() {
   return (
     <AdminGuard>
       <>
-        <h1>Admin</h1>
-        <p className="muted">Manage round results links.</p>
+        <div className="pageHeading">
+          <div className="eyebrow">ADMINISTRATION / CHAMPIONSHIP</div>
+          <h1>Manage Results</h1>
+          <p className="muted">Manage round results links.</p>
+        </div>
         <AdminTabs />
 
         {message && <div className="notice space">{message}</div>}

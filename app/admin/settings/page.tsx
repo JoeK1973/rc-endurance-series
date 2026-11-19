@@ -6,8 +6,11 @@ export default function AdminSettingsPage() {
   return (
     <AdminGuard>
       <>
-        <h1>Admin</h1>
-        <p className="muted">Application settings.</p>
+        <div className="pageHeading">
+          <div className="eyebrow">ADMINISTRATION / SYSTEM</div>
+          <h1>Settings</h1>
+          <p className="muted">Application settings.</p>
+        </div>
         <AdminTabs />
         <AdminSettings />
       </>

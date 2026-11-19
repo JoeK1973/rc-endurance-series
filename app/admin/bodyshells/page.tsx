@@ -6,8 +6,11 @@ export default function AdminBodyshellsPage() {
   return (
     <AdminGuard>
       <>
-        <h1>Admin</h1>
-        <p className="muted">Review and approve team bodyshell submissions.</p>
+        <div className="pageHeading">
+          <div className="eyebrow">ADMINISTRATION / PEOPLE &amp; TEAMS</div>
+          <h1>Bodyshell Approvals</h1>
+          <p className="muted">Review and approve team bodyshell submissions.</p>
+        </div>
         <AdminTabs />
         <AdminBodyshells />
       </>
