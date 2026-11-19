@@ -25,10 +25,14 @@ export default function RegulationsPage() {
 
   return (
     <>
-      <h1>Championship</h1>
+      <div className="pageHeading">
+        <div className="eyebrow">RC ENDURANCE SERIES / SERIES DETAILS</div>
+        <h1>Championship Regulations</h1>
+        <p className="muted">Rules, requirements and guidance for competing in the series.</p>
+      </div>
       <ChampionshipTabs />
-      <div className="card space">
-        <h2>Regulations</h2>
+      <div className="card space championshipContentCard">
+        <h2>Regulations and documents</h2>
         <p className="muted">Rules and regulations for the RC Endurance Series.</p>
         {loading ? <p className="muted">Loading regulations...</p> : error ? <p className="notice">{error}</p> : items.length === 0 ? (
           <p className="muted">No regulations have been published yet.</p>

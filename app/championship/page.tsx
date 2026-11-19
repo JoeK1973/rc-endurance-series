@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import ChampionshipTabs from "@/components/ChampionshipTabs";
+import AppIcon from "@/components/AppIcon";
 import { createClient } from "@/lib/firebase/client";
 
 type Round = {
@@ -33,10 +34,14 @@ export default function ChampionshipPage() {
 
   return (
     <>
-      <h1>Championship</h1>
+      <div className="pageHeading">
+        <div className="eyebrow">RC ENDURANCE SERIES / SERIES DETAILS</div>
+        <h1>Championship Calendar</h1>
+        <p className="muted">View the championship rounds, dates and venues.</p>
+      </div>
       <ChampionshipTabs />
 
-      <div className="space">
+      <div className="championshipRoundList">
         {loading ? (
           <div className="card">Loading championship rounds...</div>
         ) : error ? (
@@ -48,13 +53,10 @@ export default function ChampionshipPage() {
           <div className="card">No rounds have been published yet.</div>
         ) : (
           rounds.map((round) => (
-            <div className="card space" key={round.id}>
-              <h2>{round.name}</h2>
-              <p className="muted">
-                {round.event_date}
-                {round.venue ? ` · ${round.venue}` : ""}
-              </p>
-            </div>
+            <article className="card championshipRoundCard" key={round.id}>
+              <span className="championshipRoundIcon"><AppIcon name="calendar" size={21} /></span>
+              <div><h2>{round.name}</h2><p className="muted">{round.event_date}{round.venue ? ` · ${round.venue}` : ""}</p></div>
+            </article>
           ))
         )}
       </div>

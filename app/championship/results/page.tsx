@@ -60,13 +60,15 @@ export default function ResultsPage() {
 
   return (
     <>
-      <h1>Championship</h1>
+      <div className="pageHeading">
+        <div className="eyebrow">RC ENDURANCE SERIES / SERIES DETAILS</div>
+        <h1>Championship Results</h1>
+        <p className="muted">Browse published results from completed championship rounds.</p>
+      </div>
       <ChampionshipTabs />
-      <div className="card space">
-        <h2>Results</h2>
-        <p className="muted">
-          Select a round to view its published results.
-        </p>
+      <div className="card space championshipContentCard">
+        <h2>Published results</h2>
+        <p className="muted">Select a round to view its published results.</p>
 
         {loading ? (
           <p className="muted">Loading results...</p>

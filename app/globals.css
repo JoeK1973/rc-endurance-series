@@ -1547,3 +1547,48 @@ textarea:focus {
 .driverActionCount { min-width: 24px; height: 24px; padding: 2px 7px; border-radius: 99px; background: var(--nav-active-bg); color: var(--nav-active-text); text-align: center; font-size: .8rem; font-weight: 800; }
 @media (max-width: 850px) { .driverStatsGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 600px) { .driverActionGrid { grid-template-columns: 1fr; } .driverWelcome { align-items: flex-start; padding: 17px; } }
+
+/* ========================================
+   PUBLIC HOME + CHAMPIONSHIP PAGES
+======================================== */
+.pageHeading { margin-bottom: 22px; }
+.pageHeading h1 { margin: 4px 0 7px; }
+.pageHeading > p { margin: 0; }
+.publicHomePage { display: flex; flex-direction: column; gap: 22px; }
+.publicHomePage .pageHeading { margin-bottom: 0; }
+.publicFeatureCard {
+  display: flex; align-items: center; gap: 15px; padding: 19px 21px;
+  color: var(--text); text-decoration: none;
+  transition: background-color 140ms ease, border-color 140ms ease, transform 140ms ease;
+}
+.publicFeatureCard:hover { background: var(--surface-hover); border-color: var(--input-focus); transform: translateY(-1px); }
+.publicFeatureIcon, .championshipRoundIcon {
+  display: inline-flex; align-items: center; justify-content: center; flex: 0 0 46px;
+  width: 46px; height: 46px; border-radius: 12px;
+  color: var(--nav-active-text); background: var(--nav-active-bg);
+}
+.publicFeatureCopy { display: flex; flex: 1; flex-direction: column; gap: 4px; }
+.publicFeatureCopy strong { font-size: 1.05rem; }
+.publicFeatureCopy small { color: var(--muted); font-size: .9rem; line-height: 1.4; }
+.publicWelcomeCard { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 22px; }
+.publicWelcomeCard h2, .publicSectionHeading h2 { margin: 0 0 5px; }
+.publicWelcomeCard p, .publicSectionHeading p { margin: 0; }
+.publicHomeSection { display: flex; flex-direction: column; gap: 14px; }
+.publicSectionHeading { margin-bottom: 2px; }
+.homeOptionCard { min-height: 150px; padding: 21px; }
+.homeOptionCard h2 { margin-top: 0; }
+.homeOptionAction { display: inline-flex; align-items: center; gap: 4px; }
+.championshipRoundList { display: flex; flex-direction: column; gap: 12px; }
+.championshipRoundCard { display: flex; align-items: center; gap: 15px; padding: 18px 20px; }
+.championshipRoundCard h2 { margin: 0 0 4px; }
+.championshipRoundCard p { margin: 0; }
+.championshipContentCard { padding: 22px; }
+.championshipContentCard h2 { margin-top: 0; }
+.championshipContentCard ul { padding-left: 22px; }
+.championshipContentCard li { padding: 5px 0; }
+.championshipContentCard li a { color: var(--nav-active-text); font-weight: 650; }
+@media (max-width: 650px) {
+  .publicWelcomeCard { align-items: flex-start; flex-direction: column; }
+  .publicFeatureCard, .championshipRoundCard { padding: 16px; }
+  .homeOptionCard { min-height: 0; }
+}

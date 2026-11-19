@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/firebase/client";
+import AppIcon from "@/components/AppIcon";
 
 type Role = "driver" | "team_manager" | "admin" | "superuser";
 
@@ -48,16 +49,32 @@ export default function HomeOptions() {
 
   const items = !role ? [] : (role === "admin" || role === "superuser") ? options.admin : role === "team_manager" ? options.manager : options.driver;
   return (
-    <>
-      <h1>RC Endurance Series</h1>
-      <p className="muted">Your championship hub for drivers, teams and endurance racing.</p>
+    <div className="publicHomePage">
+      <div className="pageHeading">
+        <div className="eyebrow">RADIO CONTROL ENDURANCE RACING</div>
+        <h1>RC Endurance Series</h1>
+        <p className="muted">Your championship hub for drivers, teams and endurance racing.</p>
+      </div>
+
+      <Link className="card publicFeatureCard" href="/championship">
+        <span className="publicFeatureIcon"><AppIcon name="trophy" size={25} /></span>
+        <span className="publicFeatureCopy"><strong>Championship</strong><small>Explore the calendar, regulations and published race results.</small></span>
+        <AppIcon name="chevron-right" size={21} />
+      </Link>
+
       {!role ? (
-        <div className="card space"><h2>Welcome</h2><p>Sign in or register to access your driver area and take part in the championship.</p><div className="actions"><Link className="btn" href="/register">Register</Link><Link className="btn secondary" href="/login">Login</Link></div></div>
+        <section className="card publicWelcomeCard">
+          <div><h2>Get involved</h2><p className="muted">Sign in or register to access your driver area and take part in the championship.</p></div>
+          <div className="actions"><Link className="btn" href="/register">Register</Link><Link className="btn secondary" href="/login">Login</Link></div>
+        </section>
       ) : (
-        <div className="grid two space">
-          {items.map((item) => <Link className="card homeOptionCard" href={item.href} key={item.href}><h2>{item.title}</h2><p className="muted">{item.description}</p><span className="homeOptionAction">Open {item.title} →</span></Link>)}
-        </div>
+        <section className="publicHomeSection">
+          <div className="publicSectionHeading"><h2>Your areas</h2><p className="muted">Quick access to your racing activity and account.</p></div>
+          <div className="grid two">
+            {items.map((item) => <Link className="card homeOptionCard" href={item.href} key={item.href}><h2>{item.title}</h2><p className="muted">{item.description}</p><span className="homeOptionAction">Open {item.title} <AppIcon name="chevron-right" size={15} /></span></Link>)}
+          </div>
+        </section>
       )}
-    </>
+    </div>
   );
 }
