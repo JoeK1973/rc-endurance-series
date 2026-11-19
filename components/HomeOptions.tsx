@@ -15,12 +15,12 @@ const options = {
     { title: "Inbox", description: "View and reply to your messages.", href: "/messages", icon: "inbox" as const },
   ],
   manager: [
-    { title: "Driver Area", description: "Manage your driver profile and availability.", href: "/driver-area" },
+    { title: "Driver Area", description: "Manage your driver profile and availability.", href: "/driver-area", icon: "user" as const },
     { title: "Teams Area", description: "Manage your team, drivers and round registrations.", href: "/teams", icon: "users" as const },
     { title: "Inbox", description: "View and reply to your messages.", href: "/messages", icon: "inbox" as const },
   ],
   admin: [
-    { title: "Driver Area", description: "Manage your driver profile and availability.", href: "/driver-area" },
+    { title: "Driver Area", description: "Manage your driver profile and availability.", href: "/driver-area", icon: "user" as const },
     { title: "Teams Area", description: "Manage your team, drivers and round registrations.", href: "/teams", icon: "users" as const },
     { title: "Admin Area", description: "Manage the championship and website administration.", href: "/admin", icon: "settings" as const },
     { title: "Inbox", description: "View and reply to your messages.", href: "/messages", icon: "inbox" as const },
