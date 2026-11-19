@@ -497,11 +497,7 @@ setNotice(
     setNotice("Team invitation declined.");
   }
 
-  const availableCount = availability.filter(
-    (x) =>
-      x.status === "available_to_drive" ||
-      x.status === "reserve"
-  ).length;
+
 
   const upcoming = useMemo(
     () =>
@@ -599,21 +595,6 @@ setNotice(
 
       {tab === "dashboard" && (
         <div className="driverDashboard space">
-          <div className="driverWelcome card">
-            <div className="driverWelcomeMark"><AppIcon name="flag" size={26} /></div>
-            <div>
-              <h2>Welcome back, {profile.name || "Driver"}</h2>
-              <p className="muted">Keep your profile and round availability up to date so team managers can find you.</p>
-            </div>
-          </div>
-
-          <div className="driverStatsGrid">
-            <div className="card driverStat"><span className="driverStatIcon"><AppIcon name="calendar" /></span><strong>{availableCount}</strong><span className="muted">Rounds available</span></div>
-            <div className="card driverStat"><span className="driverStatIcon"><AppIcon name="inbox" /></span><strong>{invitations.length}</strong><span className="muted">Pending invitations</span></div>
-            <div className="card driverStat"><span className="driverStatIcon"><AppIcon name="users" /></span><strong>{conversations.length}</strong><span className="muted">Team conversations</span></div>
-            <div className="card driverStat"><span className="driverStatIcon"><AppIcon name="user" /></span><strong>{profile.name ? "Ready" : "Setup"}</strong><span className="muted">Driver profile</span></div>
-          </div>
-
           <section className="driverActionsSection">
             <div className="driverSectionHeading"><h2>Your driver tools</h2><p className="muted">Choose an area to manage your racing activity.</p></div>
             <div className="driverActionGrid">
@@ -627,35 +608,6 @@ setNotice(
               ))}
             </div>
           </section>
-
-          <div className="grid two">
-            <div className="card">
-              <h2>Your status</h2>
-
-              <p>
-                <b>{availableCount}</b> round
-                {availableCount === 1 ? "" : "s"}{" "}
-                marked available
-              </p>
-
-              <p>
-                <b>{conversations.length}</b> team
-                conversation
-                {conversations.length === 1
-                  ? ""
-                  : "s"}
-              </p>
-
-              <p>
-                <b>{invitations.length}</b> pending
-                team invitation
-                {invitations.length === 1
-                  ? ""
-                  : "s"}
-              </p>
-            </div>
-          </div>
-
 
           <div className="card space">
             <h2>Upcoming rounds</h2>
