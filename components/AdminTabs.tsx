@@ -7,6 +7,7 @@ const tabs = [
   { href: "/admin", label: "Manage Rounds" },
   { href: "/admin/drivers", label: "Manage Drivers" },
   { href: "/admin/teams", label: "Manage Teams" },
+  { href: "/admin/team-applications", label: "Team Applications" },
   { href: "/admin/results", label: "Manage Results" },
   { href: "/admin/registrations", label: "Manage Registrations" },
   { href: "/admin/admins", label: "Manage Admins" },
