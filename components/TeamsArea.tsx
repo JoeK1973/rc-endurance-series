@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { createClient } from "@/lib/firebase/client";
+import { createClient, auth } from "@/lib/firebase/client";
 import BodyshellArea from "@/components/BodyshellArea";
 import RegistrationArea from "@/components/RegistrationArea";
 import AppIcon from "@/components/AppIcon";
@@ -105,7 +105,6 @@ export default function TeamsArea({
       { data: profilesData },
       { data: availabilityData },
       { data: teamDriversData },
-      { data: classesData },
     ] = await Promise.all([
       supabase
         .from("teams")
@@ -134,7 +133,6 @@ export default function TeamsArea({
         .from("team_drivers")
         .select("driver_id,round_id"),
 
-      supabase.from("classes").select("id,name,active").eq("active", true).order("name"),
     ]);
 
     const loadedRounds = (roundsData || []) as Round[];
@@ -152,7 +150,17 @@ export default function TeamsArea({
     setDrivers((driversData || []) as Driver[]);
     setAvailability((availabilityData || []) as Availability[]);
     setTeamDrivers((teamDriversData || []) as TeamDriver[]);
-    const loadedClasses = (classesData || []) as RacingClass[];
+    await auth.authStateReady();
+    const firebaseUser = auth.currentUser;
+    if (!firebaseUser) throw new Error("Please sign in again to load your team classes.");
+    const classToken = await firebaseUser.getIdToken();
+    const classResponse = await fetch("/api/team-classes", {
+      headers: { Authorization: `Bearer ${classToken}` },
+      cache: "no-store",
+    });
+    const classResult = await classResponse.json();
+    if (!classResponse.ok) throw new Error(classResult.error || "Could not load racing classes.");
+    const loadedClasses = (classResult.classes || []) as RacingClass[];
     setClasses(loadedClasses);
 
     if (teamData) {
