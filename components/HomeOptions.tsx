@@ -9,21 +9,21 @@ type Role = "driver" | "team_manager" | "admin" | "superuser";
 
 const options = {
   driver: [
-    { title: "Driver Area", description: "Manage your driver profile, availability and invitations.", href: "/driver-area" },
-    { title: "Find a Team", description: "Find teams that are actively looking for drivers.", href: "/find-a-team" },
-    { title: "Register a New Team", description: "Apply to create and manage an endurance racing team.", href: "/register-team" },
-    { title: "Inbox", description: "View and reply to your messages.", href: "/messages" },
+    { title: "Driver Area", description: "Manage your driver profile, availability and invitations.", href: "/driver-area", icon: "user" as const },
+    { title: "Find a Team", description: "Find teams that are actively looking for drivers.", href: "/find-a-team", icon: "users" as const },
+    { title: "Register a New Team", description: "Apply to create and manage an endurance racing team.", href: "/register-team", icon: "clipboard" as const },
+    { title: "Inbox", description: "View and reply to your messages.", href: "/messages", icon: "inbox" as const },
   ],
   manager: [
     { title: "Driver Area", description: "Manage your driver profile and availability.", href: "/driver-area" },
-    { title: "Teams Area", description: "Manage your team, drivers and round registrations.", href: "/teams" },
-    { title: "Inbox", description: "View and reply to your messages.", href: "/messages" },
+    { title: "Teams Area", description: "Manage your team, drivers and round registrations.", href: "/teams", icon: "users" as const },
+    { title: "Inbox", description: "View and reply to your messages.", href: "/messages", icon: "inbox" as const },
   ],
   admin: [
     { title: "Driver Area", description: "Manage your driver profile and availability.", href: "/driver-area" },
-    { title: "Teams Area", description: "Manage your team, drivers and round registrations.", href: "/teams" },
-    { title: "Admin Area", description: "Manage the championship and website administration.", href: "/admin" },
-    { title: "Inbox", description: "View and reply to your messages.", href: "/messages" },
+    { title: "Teams Area", description: "Manage your team, drivers and round registrations.", href: "/teams", icon: "users" as const },
+    { title: "Admin Area", description: "Manage the championship and website administration.", href: "/admin", icon: "settings" as const },
+    { title: "Inbox", description: "View and reply to your messages.", href: "/messages", icon: "inbox" as const },
   ],
 };
 
@@ -71,7 +71,7 @@ export default function HomeOptions() {
         <section className="publicHomeSection">
           <div className="publicSectionHeading"><h2>Your areas</h2><p className="muted">Quick access to your racing activity and account.</p></div>
           <div className="grid two">
-            {items.map((item) => <Link className="card homeOptionCard" href={item.href} key={item.href}><h2>{item.title}</h2><p className="muted">{item.description}</p><span className="homeOptionAction">Open {item.title} <AppIcon name="chevron-right" size={15} /></span></Link>)}
+            {items.map((item) => <Link className="card homeOptionCard" href={item.href} key={item.href}><span className="homeOptionIcon"><AppIcon name={item.icon} size={23} /></span><span className="homeOptionContent"><h2>{item.title}</h2><p className="muted">{item.description}</p><span className="homeOptionAction">Open {item.title} <AppIcon name="chevron-right" size={15} /></span></span></Link>)}
           </div>
         </section>
       )}

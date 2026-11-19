@@ -1592,3 +1592,16 @@ textarea:focus {
   .publicFeatureCard, .championshipRoundCard { padding: 16px; }
   .homeOptionCard { min-height: 0; }
 }
+
+/* Homepage area-card icons */
+.homeOptionCard { display: flex; align-items: flex-start; gap: 15px; }
+.homeOptionIcon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 46px; height: 46px; flex: 0 0 46px; border-radius: 12px;
+  color: var(--nav-active-text); background: var(--nav-active-bg);
+}
+.homeOptionContent { display: flex; min-width: 0; flex: 1; flex-direction: column; align-items: flex-start; }
+.homeOptionContent h2 { margin: 0 0 7px; }
+.homeOptionContent p { margin: 0; }
+.homeOptionContent .homeOptionAction { margin-top: 15px; }
+@media (max-width: 650px) { .homeOptionCard { padding: 17px; } .homeOptionIcon { width: 42px; height: 42px; flex-basis: 42px; } }
