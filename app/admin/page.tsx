@@ -1,13 +1,17 @@
-import AdminRounds from "@/components/AdminRounds";
-import AdminTabs from "@/components/AdminTabs";
+import AdminDashboard from "@/components/AdminDashboard";
+import AdminGuard from "@/components/AdminGuard";
 
 export default function AdminPage() {
   return (
-    <>
-      <h1>Admin</h1>
-      <p className="muted">Manage the RC Endurance Series.</p>
-      <AdminTabs />
-      <AdminRounds />
-    </>
+    <AdminGuard>
+      <>
+        <div className="pageHeading">
+          <div className="eyebrow">RC ENDURANCE SERIES</div>
+          <h1>Admin Dashboard</h1>
+          <p className="muted">Your central hub for managing the championship.</p>
+        </div>
+        <AdminDashboard />
+      </>
+    </AdminGuard>
   );
 }

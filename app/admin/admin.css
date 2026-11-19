@@ -1,0 +1,223 @@
+/* Admin dashboard and grouped navigation */
+.pageHeading {
+  margin-bottom: 22px;
+}
+
+.pageHeading h1 {
+  margin: 4px 0 7px;
+}
+
+.eyebrow {
+  color: var(--muted-light);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.adminDashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.adminWelcome {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 22px;
+}
+
+.adminWelcome h2 {
+  margin: 0 0 5px;
+}
+
+.adminWelcome p {
+  margin: 0;
+}
+
+.adminWelcomeIcon,
+.adminSectionIcon {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--nav-active-text);
+  background: var(--nav-active-bg);
+  border-radius: 13px;
+}
+
+.adminDashboardGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.adminSectionCard {
+  padding: 21px;
+}
+
+.adminSectionHeading {
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+  margin-bottom: 16px;
+}
+
+.adminSectionHeading h2 {
+  margin: 1px 0 5px;
+}
+
+.adminSectionHeading p {
+  margin: 0;
+  font-size: 0.91rem;
+}
+
+.adminQuickLinks {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--line);
+}
+
+.adminQuickLink {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 3px;
+  color: var(--text);
+  text-decoration: none;
+  border-bottom: 1px solid var(--line);
+  transition: color 0.15s ease, padding 0.15s ease;
+}
+
+.adminQuickLink:last-child {
+  border-bottom: 0;
+  padding-bottom: 2px;
+}
+
+.adminQuickLink:hover {
+  color: var(--nav-active-text);
+  padding-left: 7px;
+}
+
+.adminQuickLink span {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.adminQuickLink strong {
+  font-size: 0.96rem;
+}
+
+.adminQuickLink small {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.adminNavigation {
+  margin: 0 0 22px;
+  padding: 9px;
+  background: var(--tab-bg);
+  border: 1px solid var(--line);
+  border-radius: 13px;
+}
+
+.adminGroupNav {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.adminGroupLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 46px;
+  padding: 10px 13px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  color: var(--tab-text);
+  text-decoration: none;
+  font-weight: 750;
+  text-align: center;
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.adminGroupLink:hover {
+  background: var(--tab-hover-bg);
+  color: var(--text-strong);
+}
+
+.adminGroupLink.active {
+  background: var(--tab-active-bg);
+  color: var(--tab-active-text);
+  border-color: var(--border);
+  box-shadow: 0 2px 5px rgba(29, 44, 66, 0.08);
+}
+
+.adminSubNav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 9px 3px 1px;
+  border-top: 1px solid var(--line);
+}
+
+.adminSubLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 7px 12px;
+  border-radius: 7px;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+
+.adminSubLink:hover {
+  color: var(--text-strong);
+  background: var(--tab-hover-bg);
+}
+
+.adminSubLink.active {
+  color: var(--nav-active-text);
+  background: var(--nav-active-bg);
+}
+
+@media (max-width: 900px) {
+  .adminGroupNav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 650px) {
+  .adminDashboardGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .adminGroupNav {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .adminGroupLink {
+    justify-content: flex-start;
+    font-size: 0.9rem;
+    padding: 10px;
+  }
+
+  .adminWelcome {
+    align-items: flex-start;
+    padding: 17px;
+  }
+
+  .adminSectionCard {
+    padding: 17px;
+  }
+}
