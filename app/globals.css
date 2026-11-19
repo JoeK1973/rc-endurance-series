@@ -1514,3 +1514,36 @@ textarea:focus {
 .homeOptionAction { display: inline-block; margin-top: 0.5rem; color: var(--blue); font-weight: 600; }
 .checkboxLabel { display: flex; align-items: center; gap: 0.65rem; }
 .checkboxLabel input { width: 1.05rem; height: 1.05rem; }
+
+/* ========================================
+   DRIVER DASHBOARD — SHARED ADMIN DESIGN LANGUAGE
+======================================== */
+.driverAreaPage .pageHeading { margin-bottom: 22px; }
+.driverDashboard { display: flex; flex-direction: column; gap: 20px; }
+.driverWelcome { display: flex; align-items: center; gap: 16px; padding: 22px; }
+.driverWelcome h2 { margin: 0 0 5px; }
+.driverWelcome p { margin: 0; }
+.driverWelcomeMark, .driverActionIcon, .driverStatIcon {
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--nav-active-text); background: var(--nav-active-bg);
+  border-radius: 12px;
+}
+.driverWelcomeMark { width: 50px; height: 50px; flex: 0 0 50px; }
+.driverStatsGrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.driverStat { display: grid; grid-template-columns: 38px 1fr; align-items: center; column-gap: 11px; padding: 16px; }
+.driverStatIcon { width: 38px; height: 38px; grid-row: span 2; }
+.driverStat strong { font-size: 1.35rem; line-height: 1.2; }
+.driverStat .muted { font-size: .82rem; }
+.driverActionsSection { display: flex; flex-direction: column; gap: 13px; }
+.driverSectionHeading h2 { margin: 0 0 4px; }
+.driverSectionHeading p { margin: 0; }
+.driverActionGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.driverActionCard { width: 100%; display: flex; align-items: center; gap: 13px; text-align: left; cursor: pointer; color: var(--text); font: inherit; }
+.driverActionCard:hover { border-color: var(--input-focus); transform: translateY(-1px); }
+.driverActionIcon { width: 44px; height: 44px; flex: 0 0 44px; }
+.driverActionCopy { display: flex; flex: 1; flex-direction: column; gap: 4px; }
+.driverActionCopy strong { font-size: .98rem; }
+.driverActionCopy small { color: var(--muted); font-size: .82rem; line-height: 1.35; }
+.driverActionCount { min-width: 24px; height: 24px; padding: 2px 7px; border-radius: 99px; background: var(--nav-active-bg); color: var(--nav-active-text); text-align: center; font-size: .8rem; font-weight: 800; }
+@media (max-width: 850px) { .driverStatsGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .driverActionGrid { grid-template-columns: 1fr; } .driverWelcome { align-items: flex-start; padding: 17px; } }

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/firebase/client";
+import AppIcon from "@/components/AppIcon";
 
 type Tab =
   | "dashboard"
@@ -548,11 +549,22 @@ setNotice(
     </button>
   );
 
-  return (
-    <div>
-      <h1>Driver Area</h1>
+  const driverActions: { id: Tab; title: string; description: string; icon: "user" | "calendar" | "inbox" | "users"; count?: number }[] = [
+    { id: "profile", title: "My Profile", description: "Update your racing details and driver information.", icon: "user" },
+    { id: "availability", title: "My Availability", description: "Tell teams which championship rounds you can race.", icon: "calendar" },
+    { id: "invitations", title: "Team Invitations", description: "Review invitations to join teams for upcoming rounds.", icon: "inbox", count: invitations.length },
+    { id: "requests", title: "Contact Requests", description: "Continue conversations with interested teams.", icon: "users", count: conversations.length },
+  ];
 
-      <div className="driverTabs">
+  return (
+    <div className="driverAreaPage">
+      <div className="pageHeading">
+        <div className="eyebrow">RC ENDURANCE SERIES / DRIVER PORTAL</div>
+        <h1>{tab === "dashboard" ? "Driver Dashboard" : ({ profile: "My Profile", availability: "My Availability", invitations: "Team Invitations", requests: "Contact Requests" } as Record<string, string>)[tab]}</h1>
+        <p className="muted">{tab === "dashboard" ? "Your racing profile, championship availability and team activity in one place." : "Manage your driver account and championship activity."}</p>
+      </div>
+
+      {tab !== "dashboard" && <div className="driverTabs">
         <TabButton
           id="dashboard"
           label="Dashboard"
@@ -577,7 +589,7 @@ setNotice(
           id="requests"
           label="Contact Requests"
         />
-      </div>
+      </div>}
 
       {notice && (
         <div className="notice space">
@@ -586,20 +598,37 @@ setNotice(
       )}
 
       {tab === "dashboard" && (
-        <div className="space">
-          <div className="grid two">
-            <div className="card">
-              <h2>
-                Welcome, {profile.name || "Driver"}
-              </h2>
-
-              <p className="muted">
-                Keep your profile and round
-                availability up to date so team
-                managers can find you.
-              </p>
+        <div className="driverDashboard space">
+          <div className="driverWelcome card">
+            <div className="driverWelcomeMark"><AppIcon name="flag" size={26} /></div>
+            <div>
+              <h2>Welcome back, {profile.name || "Driver"}</h2>
+              <p className="muted">Keep your profile and round availability up to date so team managers can find you.</p>
             </div>
+          </div>
 
+          <div className="driverStatsGrid">
+            <div className="card driverStat"><span className="driverStatIcon"><AppIcon name="calendar" /></span><strong>{availableCount}</strong><span className="muted">Rounds available</span></div>
+            <div className="card driverStat"><span className="driverStatIcon"><AppIcon name="inbox" /></span><strong>{invitations.length}</strong><span className="muted">Pending invitations</span></div>
+            <div className="card driverStat"><span className="driverStatIcon"><AppIcon name="users" /></span><strong>{conversations.length}</strong><span className="muted">Team conversations</span></div>
+            <div className="card driverStat"><span className="driverStatIcon"><AppIcon name="user" /></span><strong>{profile.name ? "Ready" : "Setup"}</strong><span className="muted">Driver profile</span></div>
+          </div>
+
+          <section className="driverActionsSection">
+            <div className="driverSectionHeading"><h2>Your driver tools</h2><p className="muted">Choose an area to manage your racing activity.</p></div>
+            <div className="driverActionGrid">
+              {driverActions.map((action) => (
+                <button type="button" className="card driverActionCard" key={action.id} onClick={() => { setTab(action.id); setNotice(""); }}>
+                  <span className="driverActionIcon"><AppIcon name={action.icon} size={22} /></span>
+                  <span className="driverActionCopy"><strong>{action.title}</strong><small>{action.description}</small></span>
+                  {typeof action.count === "number" && action.count > 0 && <span className="driverActionCount">{action.count}</span>}
+                  <AppIcon name="chevron-right" size={18} />
+                </button>
+              ))}
+            </div>
+          </section>
+
+          <div className="grid two">
             <div className="card">
               <h2>Your status</h2>
 
