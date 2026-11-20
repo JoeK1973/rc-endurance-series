@@ -8,6 +8,7 @@ const sections = [
     icon: "calendar" as const,
     links: [
       { label: "Manage rounds", href: "/admin/rounds", detail: "Dates, venues and entry limits" },
+      { label: "Manage classes", href: "/admin/classes", detail: "Create and manage racing classes" },
       { label: "Manage results", href: "/admin/results", detail: "Publish results links" },
       { label: "Regulations", href: "/admin/regulations", detail: "Rules and documents" },
     ],
